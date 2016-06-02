@@ -33,7 +33,7 @@ void PushbackSystem::heartbeat() {
       if (readySinkTo >= son) {
         // start raising
         digitalWrite(oAirSpringLockout, HIGH);  //written high to allow air into the springs
-        Serial.println(" PBS heartbeat changed PBS State ");
+        Serial.println(" PBS heartbeat changed PBS State: left sinking, now raising ");
         enterState(PBS_READY2_RAISING);
       }
       break;
@@ -44,7 +44,7 @@ void PushbackSystem::heartbeat() {
       if (readyRaiseTo <= son) {
         // start settling
         enterState(PBS_READY3_SETTLING);
-      }
+      }else{enterState(PBS_READY2_RAISING);}
       break;
 
     case PBS_READY3_SETTLING:

@@ -182,8 +182,15 @@ void halSetInitialChargeUpDown(int dir) {
  *  1. Writes the pushback arm to raise or lower depending on the previous state
 */
 void halSetPushbackUpDown(int dir) {
-  digitalWrite(oPushbackArmDownPin, dir < 0 ? HIGH : LOW);
-  digitalWrite(oPushbackArmUpPin,   dir > 0 ? HIGH : LOW);
+	if(dir == 1){
+		  digitalWrite(oPushbackArmDownPin, LOW);
+		  digitalWrite(oPushbackArmUpPin, HIGH);
+		  delay(75);
+		  digitalWrite(oPushbackArmUpPin, LOW);
+	}else{
+	  digitalWrite(oPushbackArmDownPin, dir < 0 ? HIGH : LOW);
+	  digitalWrite(oPushbackArmUpPin,   dir > 0 ? HIGH : LOW);
+	}
 } // end halSetPushbackUpDown
 
 

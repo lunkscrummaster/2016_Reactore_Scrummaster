@@ -227,7 +227,10 @@ void MasterSystem::UIModeChanged(byte uis) {
   //  Serial.print("lastUIState: "); Serial.println(lastUIState);
   switch (lastUIState) {
     case UIS_SCRUM_INDIVIDUAL:   pushback.goReady(ASM_INDIVIDUAL, INDIVIDUAL_SINK_RAISE);  break;
-    case UIS_SCRUM_POWER:        pushback.goReady(ASM_POWER,      POWER_SINK_RAISE);       break;
+    case UIS_SCRUM_POWER:
+    	Serial.println("	UIS scrum power go ready called");
+    	pushback.goReady(ASM_POWER,      POWER_SINK_RAISE);
+    	break;
 
     case UIS_SCRUM_STRENGTH:
       initcharge.enable(true);
@@ -364,6 +367,13 @@ void MasterSystem::fillOutriggerArray(){
 	}
 }
 
+/*-------------------------------------------getLastUIState------------------------------------------------------------------
+ * Called from:
+ * 1. Returns the lastUIState variable
+*/
+byte MasterSystem::getLastUIState() {
+	return lastUIState;
+}
 
 
 

@@ -24,8 +24,8 @@
 //---------------------------------------#DEFINES---------------------------------------
 #define MILLIS_MAX 					4294967295
 
-#define INDIVIDUAL_SINK_RAISE      	345, 375   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
-#define POWER_SINK_RAISE           	345, 375  	// here are the pushback arm settings
+#define INDIVIDUAL_SINK_RAISE      	360, 370   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
+#define POWER_SINK_RAISE           	360, 370  	// here are the pushback arm settings
 #define STRENGTH_SINK_RAISE        	325, 332
 
 #define CHARGE_PRESSURE_TRIP  		400   		// if pressure over this, shutdown (400 means approx. 30 lbs) TRUCK
@@ -54,6 +54,7 @@ class MasterSystem {
     void UIModeChanged(byte uis);
     void UIVarChanged (byte uivn, int val);
 
+    byte getLastUIState();
 
     void updateOutriggerLooseArray(void);
     void updateOutriggerTightArray(void);
@@ -75,6 +76,8 @@ class MasterSystem {
     volatile int pushbackSonar [AVE_ARRAY_SIZE];
     volatile int pushbackSonarAve;
     volatile int pushbackIndex;
+
+
 
   private:
     byte lastUIState;

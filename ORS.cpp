@@ -9,7 +9,7 @@
 //--------------------------------------OUTRIGGER_CONSTRUCTOR--------------------------------------
 OutriggerSystem::OutriggerSystem() {
 	inBalanceMode = false;
-	outriggersFirstPumpDone = false;
+	outriggersFirstPumpDone = true;
 }
 
 /*--------------------------------------OUTRIGGER_LOOP--------------------------------------
@@ -18,10 +18,11 @@ OutriggerSystem::OutriggerSystem() {
 */
 void OutriggerSystem::loop() {
   //  Serial.println("Outrigger Loop started");
-  if (outriggersFirstPumpDone == false) {
+  if (outriggersFirstPumpDone == false && pushback.getState() == PBS_QUIET) {
+	  Serial.println("first pump");
     digitalWrite(oOutriggerLooseUp, HIGH);
     digitalWrite(oOutriggerTightUp, HIGH);
-    delay(200);
+    delay(100);
     digitalWrite(oOutriggerLooseUp, LOW);
     digitalWrite(oOutriggerTightUp, LOW);
     outriggersFirstPumpDone = true;
@@ -38,8 +39,9 @@ void OutriggerSystem::loop() {
       if (ld - td < - ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, HIGH);
         Serial.println("	Outrigger up");
-        delay(100);
+        delay(30);
         digitalWrite(oOutriggerLooseUp, LOW);
+        delay(200);
       } else if (ld - td > ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, LOW);
       } else { // end 1st else
