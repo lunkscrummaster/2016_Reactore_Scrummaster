@@ -70,6 +70,7 @@ const byte ledDigits[] = {
  * Max possible values are just above ^^
 */
 void display_num(int number) {
+	Serial.print("display_num: "); Serial.println(number);
 
   if (number < LED_MIN)  number = LED_MIN;
   if (number > LED_MAX)  number = LED_MAX;
@@ -85,7 +86,6 @@ void display_num(int number) {
   byte hundreds = (number % 1000) / 100;//gets the second didgit from the left
   byte tens = (number % 100) / 10; // get the third digit from the left
   byte ones = (number % 10); // gets the final single digits
-
   digitalWrite(oLEDClear, HIGH);// set the bit so we can write to the screen
   shiftOut(oLEDData, oLEDClock, LSBFIRST, ledDigits[ones]);
   shiftOut(oLEDData, oLEDClock, LSBFIRST, ledDigits[tens]);
@@ -104,7 +104,8 @@ void Accustat::displayHeartbeat() {
   // Serial.println("Accustat displayHeartbeat start");
   // if displayAlternateIndex == 0 then display sessionPeak else display currentPeak;
   // this cycles so that it displays sessionPeak, currentPeak, currentPeak, currentPeak, ...
-  display_num(displayAlternateIndex == 0 ? sessionPeak : currentPeak);
+	//Serial.print("dispAltInd: ");Serial.print(displayAlternateIndex); Serial.print("  sessionPeak: "); Serial.print(sessionPeak);Serial.print("  currentPeak: "); Serial.println(currentPeak);
+	display_num(displayAlternateIndex == 0 ? sessionPeak : currentPeak);
 
   if (displayAlternateCountdown-- <= 1) {
     displayAlternateCountdown = DISPLAY_PERIOD;
@@ -158,6 +159,7 @@ void Accustat::loop() {
     pbAvg.update(p);//update the average, using the last read value
 
     int avg = pbAvg.getAverage(); //updated average
+    Serial.print("p: "); Serial.println(p);
     switch (state) {
       case AS_PREHIT: {
           int diff = p - avg; //difference between the current and average reading
@@ -286,7 +288,7 @@ void Accustat::saveHiddenPeak() {
 */
 void Accustat::enterState(byte newState) {
   state = newState;
-  // Serial.print("Accustat enterState: "); Serial.println(newState);
+  Serial.print("Accustat enterState: "); Serial.println(newState);
   switch (state) {
     case AS_QUIET:
       displayAlternateIndex = DISPLAYMODE_ALTERNATE; // this code indicates "alternate between current peak and session peak"
@@ -336,7 +338,7 @@ void Accustat::heartbeat() {
   //Serial.println("Accustat Heartbeat Started");
   beeperHeartbeat();//just above
   displayHeartbeat();//just above
-
+  //Serial.print("lastReading: "); Serial.println(lastReading);
   /* // accustat states
     #define AS_QUIET      0   #define AS_PREHIT     1   #define AS_HITTING    2   #define AS_POSTHIT    3
   */
@@ -349,8 +351,9 @@ void Accustat::heartbeat() {
         //changed this equation to fit experimentally acquired data
         int x = lastReading - NATURAL_PRECHARGE;
         int disp = ((-6) * (10 ^ (-10)) * (x ^ 6)) + (4 * (10 ^ (-7)) * (x ^ 5)) - (1 * (10 ^ (-4)) * (x ^ 4)) + (0.0111 * (x ^ 3)) - (0.3613 * (x ^ 2)) + (11.237 * x);
+        Serial.print("lastRead: "); Serial.print(lastReading);Serial.print(" display: "); Serial.println(disp);
         if (disp < 0)
-          disp = 0;
+          disp = -disp;
         /*
            // Accustat modes POSSIBLE MODES
           #define ASM_INDIVIDUAL  0 //individual just measure how strong someone is pushing
@@ -449,7 +452,19 @@ byte Accustat::returnState() {
   return state;
 } // end returnState
 
+/* ---------------------------------------Accustat::getHasSeenBall()---------------------------------------
+ *  Called from: sonarISR in main page
+ *  1. Returns the hasSeenBall
+*/
+boolean Accustat::getHasSeenBall(){
+	return hasSeenBall;
+}
 
-
-
+/* ---------------------------------------Accustat::setHasSeenBall()---------------------------------------
+ *  Called from: sonarISR in main page
+ *  1. Returns the hasSeenBall
+*/
+void Accustat::setHasSeenBall(boolean ball){
+	hasSeenBall = ball;
+}
 

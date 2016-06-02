@@ -183,22 +183,15 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 		if (moving to fast)
 		shutdown
 	*/
-	if (accustat.returnState() == AS_HITTING){
-        if (!accustat.hasSeenBall){
+	if (accustat.returnState() == AS_HITTING){			//checks for ball if, if it should be checking, aka accustat.state === hitting
+        if (accustat.getHasSeenBall()==false){
         	//check for ball
         	noInterrupts();
         	if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70)
-        			accustat.hasSeenBall = true; //ball has been seen
+        			accustat.setHasSeenBall(true); //ball has been seen
         	interrupts();
         }// end if
 	}
-
-
-
-
-
-
-
 } // end sonarISR()
 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------

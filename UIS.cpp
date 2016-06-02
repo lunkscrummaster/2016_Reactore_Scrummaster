@@ -125,17 +125,6 @@ void UISystem::setModVarInfo(byte vn, byte col, byte row, byte width, int val,
  5. Then based on the current state, and the button presses, enter a new state
  */
 void UISystem::loop() {
-	//  Serial.println("UI Loop started");
-	//  Serial.print("UI state: "); Serial.println(ui.state);
-	lcd.setCursor(0, 3); //set cursor to 3ed row and 1st column
-	noInterrupts();
-	volatile int dummy = master.pushbackSonarAve;
-	interrupts();
-	lcd.print(dummy);
-	lcd.setCursor(4, 3);
-	lcd.print(analogRead(aiPushbackSonar) * 5);
-	//delay(200);
-
 	long m = micros();
 	long elapsedMicros = m - lastMicros;
 	if (elapsedMicros < 0) //
@@ -308,8 +297,6 @@ boolean UISystem::setVar(byte vn, int val) {
 
 	if (hasChanged)
 		master.UIVarChanged(vn, val);
-	Serial.print("vn: "); Serial.print(vn); Serial.print("  val: "); Serial.println(val);
-
 	return hasChanged;
 } // end setVar
 

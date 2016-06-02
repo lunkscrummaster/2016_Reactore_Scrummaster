@@ -132,8 +132,8 @@ void halSetup() {
     if (st >= 0xff)
       break;                        //breaks at end of array signified by 0xff
     byte pin = outPins[i + 1];
-    digitalWrite(pin, st);
     pinMode(pin, OUTPUT);
+    digitalWrite(pin, st);
   } //end for
 } //end halSetup()
 

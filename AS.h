@@ -64,7 +64,8 @@ class Accustat {
 
     byte returnmode(); //this returns the mode at start up
     byte returnState(); //this returns the state
-
+    void setHasSeenBall(boolean ball);
+    boolean getHasSeenBall(void);
     Averager pbAvg;
 
   private:
