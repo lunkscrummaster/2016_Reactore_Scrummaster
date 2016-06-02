@@ -98,7 +98,7 @@ void UISystem::setNonModVarInfo(byte vn, byte col, byte row, byte width) {
 	cols[vn] = col;
 	rows[vn] = row;
 	wide[vn] = width;
-	// vals[vn] = 0; // this is the problem **** change made from 0 to the read
+	 //vals[vn] = 0; // this is the problem **** change made from 0 to the read
 	vals[vn] = analogRead(aiReservoirPin);
 } // end setNonModVarInfo
 
@@ -290,16 +290,25 @@ void UISystem::heartbeat() {
  2. then returns true of false depending on if the variable changed
  */
 boolean UISystem::setVar(byte vn, int val) {
-	if (val < mins[vn])
-		mins[vn] = val; //changed May 23; from val = min[vn]
-	if (val > maxs[vn])
-		maxs[vn] = val;
+
+	if(getState() == UIS_TOWING){
+		if (val < mins[vn])
+			mins[vn] = val; //changed May 23; from val = min[vn]
+		if (val > maxs[vn])
+			maxs[vn] = val;
+	}else{
+		if (val < mins[vn])
+			val = mins[vn]; //changed May 23; from val = min[vn]
+		if (val > maxs[vn])
+			val = maxs[vn];
+	}
 
 	boolean hasChanged = vals[vn] != val;
 	vals[vn] = val;
 
 	if (hasChanged)
 		master.UIVarChanged(vn, val);
+	Serial.print("vn: "); Serial.print(vn); Serial.print("  val: "); Serial.println(val);
 
 	return hasChanged;
 } // end setVar

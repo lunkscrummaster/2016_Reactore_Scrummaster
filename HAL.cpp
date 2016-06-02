@@ -144,16 +144,16 @@ void halSetup() {
  *  #define BALLIN_TRIP  5000//chagned from 3000 to 5000, should trip at anything less than
  *  BALLIN_TRIP should be tested and changed depending on wanted trip level
 */
-boolean halIsBallIn(byte pin) {
-  int sonar = hal_ReadSonarMB7360(2, pin);
- // Serial.print("sonar value: ");Serial.print(sonar);Serial.print(" Pin #: ");Serial.print(pin);
- // Serial.println(" ballin? ");
-  return sonar > 0 && sonar < BALLIN_TRIP;// sonar reads value > 0 and less than or equal to ???
-/**************************************************************************************************************
- * what value does that BALLIN_TRIP need to be?
- * Remember the sonar reads 29~30cm when detecting 30cm or less objects
- *****************************************************************************************************/
-} // end halIsBallIn
+//boolean halIsBallIn(byte pin) {
+//  int sonar = hal_ReadSonarMB7360(2, pin);
+// // Serial.print("sonar value: ");Serial.print(sonar);Serial.print(" Pin #: ");Serial.print(pin);
+// // Serial.println(" ballin? ");
+//  return sonar > 0 && sonar < BALLIN_TRIP;// sonar reads value > 0 and less than or equal to ???
+///**************************************************************************************************************
+// * what value does that BALLIN_TRIP need to be?
+// * Remember the sonar reads 29~30cm when detecting 30cm or less objects
+// *****************************************************************************************************/
+//} // end halIsBallIn
 
 
 /* halIsTowScrumSwitchInTowing

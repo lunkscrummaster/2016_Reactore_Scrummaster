@@ -92,7 +92,7 @@ void setup() {
 
   initPushbackAve();
 
-  sonarTimer.initialize(140000);
+  sonarTimer.initialize(134000);
 
   sonarTimer.attachInterrupt(sonarISR);
 
@@ -165,11 +165,6 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 	if(master.pushbackIndex == AVE_ARRAY_SIZE)
 		master.pushbackIndex = 0;
 
-	//  Serial.print("ISR Read: "); Serial.print(master.pushbackSonar[index]);
-	//  Serial.print(" ANalog Read:   "); Serial.print(analogRead(aiPushbackSonar));
-	//  Serial.print(" reading: "); Serial.println(reading);
-
-
 	//  if (pushback.readyRaiseTo <= master.pushbackSonar[AVE_ARRAY_SIZE - 1] &&
 	//      pushback.getState()   == PBS_READY2_RAISING                       &&
 	//      sleep.getState()      == SSS_AWAKE) {
@@ -178,6 +173,8 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 	//    pushback.enterState(PBS_READY3_SETTLING);
 	//    //pushback.heartbeat();
 	//  } // end if
+
+
 	/*    CODE PLANNING TO CHECK FOR BALL IN, AND EMERGENCY SHUTDOWN
 	 *   if (accustat.returnmode() == AS_HITTING)  // if we are hitting and need
 	 *   {
@@ -186,6 +183,22 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 		if (moving to fast)
 		shutdown
 	*/
+	if (accustat.returnState() == AS_HITTING){
+        if (!accustat.hasSeenBall){
+        	//check for ball
+        	noInterrupts();
+        	if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70)
+        			accustat.hasSeenBall = true; //ball has been seen
+        	interrupts();
+        }// end if
+	}
+
+
+
+
+
+
+
 } // end sonarISR()
 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------

@@ -342,17 +342,6 @@ void Accustat::heartbeat() {
   */
   switch (state) {
     case AS_HITTING: {
-        // check if seen ball
-        if (! hasSeenBall &&
-            (halIsBallIn(aiLoose_ball_sonar) || //changed io to ai for pins
-             halIsBallIn(aiTight_ball_sonar))   // changed io to ai for pins
-           )
-        {
-          hasSeenBall = true; //ball has been seen
-        }// end if
-
-        //DISPLAY_FACTOR  20
-        //
         /* **** Changed made May 21 by Trevor and Zach
             Below, the converiosn that was made before didn't seem right.
             We changed the equation to what we got from the data that was supplised by Kevin
@@ -451,3 +440,16 @@ void Accustat::heartbeat() {
 byte Accustat::returnmode() {
   return mode;
 } // end returnmode
+
+/* ---------------------------------------Accustat::returnstate()---------------------------------------
+ *  Called from: sonarISR in main page
+ *  1. Returns the Accustat state
+*/
+byte Accustat::returnState() {
+  return state;
+} // end returnState
+
+
+
+
+

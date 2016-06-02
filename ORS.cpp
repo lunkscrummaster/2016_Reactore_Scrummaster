@@ -19,7 +19,6 @@ OutriggerSystem::OutriggerSystem() {
 void OutriggerSystem::loop() {
   //  Serial.println("Outrigger Loop started");
   if (outriggersFirstPumpDone == false && pushback.getState() == PBS_QUIET) {
-	  Serial.println("first pump");
     digitalWrite(oOutriggerLooseUp, HIGH);
     digitalWrite(oOutriggerTightUp, HIGH);
     delay(100);
@@ -38,7 +37,6 @@ void OutriggerSystem::loop() {
     if (ld > 0 && td > 0) { // if both are reading good values
       if (ld - td < - ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, HIGH);
-        Serial.println("	Outrigger up");
         delay(30);
         digitalWrite(oOutriggerLooseUp, LOW);
         delay(200);

@@ -63,11 +63,12 @@ class Accustat {
     void saveHiddenPeak();  // after Strength Charge completes, save the hidden peak as the Current Peak
 
     byte returnmode(); //this returns the mode at start up
+    byte returnState(); //this returns the state
 
     Averager pbAvg;
 
   private:
-    byte state;
+    byte state; // one of AS_
     void enterState(byte newState);
 
     byte mode;  // one of ASM_*

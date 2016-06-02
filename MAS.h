@@ -26,7 +26,7 @@
 
 #define INDIVIDUAL_SINK_RAISE      	360, 370   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
 #define POWER_SINK_RAISE           	360, 370  	// here are the pushback arm settings
-#define STRENGTH_SINK_RAISE        	325, 332
+#define STRENGTH_SINK_RAISE        	325, 330
 
 #define CHARGE_PRESSURE_TRIP  		400   		// if pressure over this, shutdown (400 means approx. 30 lbs) TRUCK
 #define CHARGE_DISTANCE_TRIP  		390   		// if sonar over this, shutdown
