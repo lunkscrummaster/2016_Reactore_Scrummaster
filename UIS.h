@@ -11,6 +11,7 @@
 #include "Arduino.h"
 #include "Debug.h"
 #include <LiquidCrystal.h>
+#include "AVG.h"
 #include "AS.h"
 #include "CIS.h"
 #include "HAL.h"
@@ -68,6 +69,8 @@ class UISystem {
     void goStrengthPosthit(byte SPH_code, int val);
 
     //byte returnUIState();
+    int mainTime;
+    int heartTime;
 
   private:
 

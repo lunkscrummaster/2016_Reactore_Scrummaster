@@ -43,7 +43,7 @@ void MasterSystem::loop() {
 
   if (strengthChargeTimeoutMillis > 0) {
 	noInterrupts();
-    volatile int son = pushbackSonarAve;
+    int son = pushbackSonarAve;
     interrupts();
     int pres = analogRead(aiAchievedPin);
 
@@ -115,12 +115,14 @@ void MasterSystem::heartbeat() {
       // enter Towing mode
       lastTowSwitch = MAS_LTS_ON;
       ui.enterState(UIS_TOWING); //display towing state
+      digitalWrite(oDisplayPowerPin, LOW);
     }
   } else {
     if (lastTowSwitch != MAS_LTS_OFF) {
       // exit Towing mode
       lastTowSwitch = MAS_LTS_OFF;
       ui.enterState(lastReadyState); //display last state
+      digitalWrite(oDisplayPowerPin, HIGH);
     }
   } // end else
 
@@ -332,15 +334,6 @@ void MasterSystem::updateOutriggerTightArray() {
 		outriggerTightIndex = 0;
 } // end MasterSystem::getOutriggerTightAve()
 
-//-------------------------------------------getPushbackSonarAve------------------------------------------------------------------
-//int MasterSystem::getPushbackSonarAve(){
-//	noInterrupts();
-//	for(int i = 0; i < AVE_ARRAY_SIZE; i++){
-//		pushbackSonarAve += pushbackSonar[i]/AVE_ARRAY_SIZE;
-//	}
-//	interrupts();
-//	return pushbackSonarAve;
-//}
 
 //-------------------------------------------fillOutriggerArray------------------------------------------------------------------
 void MasterSystem::fillOutriggerArray(){

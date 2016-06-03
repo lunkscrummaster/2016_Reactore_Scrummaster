@@ -20,7 +20,6 @@
 #define ASM_STRENGTH    		2
 
 #define DISPLAY_FACTOR    		20			// raw pressure readings are multiplied by this for display
-#define NATURAL_PRECHARGE 		200
 #define ENGAGED_MIN       		150
 
 #define AS_QUIET      			0 			// accustat states // sleep/ not being used
@@ -67,8 +66,13 @@ class Accustat {
     void setHasSeenBall(boolean ball);
     boolean getHasSeenBall(void);
     Averager pbAvg;
+    void setNaturalPreCharge(void);
+    int getNaturalPreCharge(void);
+    int aveTimer;
+    bool aveTimerStart;
 
   private:
+    int naturalPreCharge;
     byte state; // one of AS_
     void enterState(byte newState);
 

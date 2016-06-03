@@ -21,7 +21,7 @@ void OutriggerSystem::loop() {
   if (outriggersFirstPumpDone == false && pushback.getState() == PBS_QUIET) {
     digitalWrite(oOutriggerLooseUp, HIGH);
     digitalWrite(oOutriggerTightUp, HIGH);
-    delay(100);
+    delay(50);
     digitalWrite(oOutriggerLooseUp, LOW);
     digitalWrite(oOutriggerTightUp, LOW);
     outriggersFirstPumpDone = true;
@@ -43,7 +43,9 @@ void OutriggerSystem::loop() {
       } else if (ld - td > ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, LOW);
       } else { // end 1st else
-        setBalanceMode(false);
+    	  setBalanceMode(false);
+    	  delay(100);
+    	  accustat.setNaturalPreCharge();
       }//ends last else
 /*
       if (digitalRead(oOutriggerLooseUp)) {

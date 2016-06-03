@@ -61,7 +61,7 @@ void chargeAlternateCallback() {
 
 //--------------------------MAIN_HEARTBEAT----------------------------------------------------------------
 void heartbeat() {
-
+int heartStart = millis();
   accustat.heartbeat();     //AS.cpp
   comp.heartbeat();         //CIS.cpp comp = compressor system
   initcharge.heartbeat();   //ICS.cpp initial charge system
@@ -71,7 +71,7 @@ void heartbeat() {
   pushback.heartbeat();     // PBS.cpp
   sleep.heartbeat();        // SS.cpp
   ui.heartbeat();           // UIS.cpp
-
+ui.heartTime = millis()-heartStart;
 }
 
 //--------------------------SETUP----------------------------------------------------------------
@@ -106,6 +106,8 @@ void setup() {
 //--------------------------LOOP----------------------------------------------------------------
 void loop() {
 
+	int startLoop = millis();
+
   ui.loop();          // call debouncer frequently
 
   accustat.loop();    // to average pushback-arm pressure readings
@@ -127,12 +129,14 @@ void loop() {
 
   }
   master.loop();      // during Strength Charge phase
+  ui.mainTime = millis()-startLoop;
 
   heartbeatTimer.update();
 
   chargeAlternateTimer.update();
 
-  //Serial.print("  ************************ time for main loop:    "); Serial.println(millis() - StartLoop);
+
+//  Serial.print("  ************************ time for main loop:    "); Serial.println(millis() - startLoop);
   //Serial.print("  The truck pin is:  "); Serial.println(digitalRead(iTrailerPowerPin));
 
 } // end loop
@@ -149,8 +153,11 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 
 	int oldReading = master.pushbackSonar[master.pushbackIndex];
 	int temp =  analogRead(aiPushbackSonar)*5;
-
-	if(temp > 450 || temp < 290){
+//	master.pushbackSonar[master.pushbackIndex] = analogRead(aiPushbackSonar);
+//	while(master.pushbackSonar[master.pushbackIndex] > 400 || master.pushbackSonar[master.pushbackIndex] < 290){
+//		master.pushbackSonar[master.pushbackIndex] = analogRead(aiPushbackSonar);
+//	}
+	if(temp > 400 || temp < 290){
 		if(master.pushbackIndex == 0){
 			master.pushbackSonar[master.pushbackIndex] = master.pushbackSonar[AVE_ARRAY_SIZE-1];
 		}else{

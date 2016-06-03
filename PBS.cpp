@@ -20,7 +20,7 @@ PushbackSystem::PushbackSystem() {
 */
 void PushbackSystem::heartbeat() {
 	noInterrupts();
-	volatile int son = master.pushbackSonarAve;//find value of pushback sonar
+	int son = master.pushbackSonarAve;//find value of pushback sonar
 	interrupts();
 
   switch (state) {
@@ -39,8 +39,8 @@ void PushbackSystem::heartbeat() {
       break;
 
     case PBS_READY2_RAISING:
-      // Serial.print("  readyRaiseTo= ");Serial.print(readyRaiseTo);
-      // Serial.print("  son = "); Serial.println(son);
+       Serial.print("  readyRaiseTo= ");Serial.print(readyRaiseTo);
+       Serial.print("  son = "); Serial.println(son);
       if (readyRaiseTo <= son) {
         // start settling
         enterState(PBS_READY3_SETTLING);
@@ -121,6 +121,7 @@ void PushbackSystem::enterState(byte newState) {
 void PushbackSystem::goReady(byte asMode, int sinkTo, int raiseTo) {
   readySinkTo  = sinkTo;
   readyRaiseTo = raiseTo;
+  //Serial.print("	readyRaiseto = "); Serial.println(readyRaiseTo);
   accustat.setMode(asMode);
 //  Serial.println(" goReady changed PBS STATE");
   enterState(PBS_READY1_SINKING);// this is above^^

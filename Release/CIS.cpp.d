@@ -13,7 +13,7 @@ CIS.cpp.o: ../CIS.cpp ../CIS.h \
  ../Debug.h ../SS.h ../HAL.h ../UIS.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/libraries/LiquidCrystal/1.0.4/src/LiquidCrystal.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Print.h \
- ../AS.h ../AVG.h ../TimerOne.h ../Timer.h ../Event.h ../MAS.h ../ORS.h \
+ ../AVG.h ../TimerOne.h ../Timer.h ../Event.h ../AS.h ../MAS.h ../ORS.h \
  ../PBS.h ../pinDefs.h ../ICS.h ../Reactore_2016.h
 
 ../CIS.h:
@@ -52,8 +52,6 @@ CIS.cpp.o: ../CIS.cpp ../CIS.h \
 
 /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Print.h:
 
-../AS.h:
-
 ../AVG.h:
 
 ../TimerOne.h:
@@ -61,6 +59,8 @@ CIS.cpp.o: ../CIS.cpp ../CIS.h \
 ../Timer.h:
 
 ../Event.h:
+
+../AS.h:
 
 ../MAS.h:
 

@@ -30,6 +30,9 @@ void SleepSystem::heartbeat() {
   //Serial.print("Sleep system state: "); Serial.println(sleep.state);
   // Serial.print(" timeoutHeartbeats: "); Serial.println(timeoutHeartbeats);
   //  Serial.print("oBattLink:  "); Serial.print(digitalRead(oBatteryLink));
+
+
+
   switch (state) {
     case SSS_AWAKE:
       if (timeoutHeartbeats > 0)  {

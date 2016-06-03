@@ -79,7 +79,7 @@ UISystem::UISystem(LiquidCrystal &lc) :
 
 	setModVarInfo(UIVM_STRENGTH_THRESHOLD, 15, 1, 2, 10, 3, 10);
 	setModVarInfo(UIVM_STRENGTH_DIFFICULTY, 15, 2, 2, 2, 1, 10);
-	setModVarInfo(UIVM_STRENGTH_DURATION, 15, 3, 2, 5, 1, 15);
+	setModVarInfo(UIVM_STRENGTH_DURATION, 15, 3, 2, 5, 1, 20);
 
 	// non-modifiable var info: col, row, width //////////
 
@@ -125,6 +125,23 @@ void UISystem::setModVarInfo(byte vn, byte col, byte row, byte width, int val,
  5. Then based on the current state, and the button presses, enter a new state
  */
 void UISystem::loop() {
+//	lcd.setCursor(0, 3);
+//	lcd.print(analogRead(aiAchievedPin));
+//	lcd.print("  ");
+//	lcd.print(accustat.pbAvg.getAverage());
+//	lcd.print("  ");
+//	lcd.print(accustat.getNaturalPreCharge());
+//	lcd.setCursor(0,2);
+//	lcd.print("                ");
+//	lcd.setCursor(0, 2);
+//	lcd.print(mainTime);
+//	lcd.print("  ");
+//	lcd.print(heartTime);
+//	if(accustat.aveTimerStart == false){
+//		lcd.print("  ");
+//		lcd.print(accustat.aveTimer);
+//	}
+
 	long m = micros();
 	long elapsedMicros = m - lastMicros;
 	if (elapsedMicros < 0) //
@@ -422,13 +439,14 @@ void UISystem::enterState(byte newState) {
 			lcd.setCursor(6, 2);
 			switch (strengthPosthitCode) {
 			case UISPH_TOO_HIGH:
-				lcd.print("TOO HIGH");
+				lcd.print("Difficulty is set to high adujust down"); //difficulty is to high
 				break;
 			case UISPH_TOO_FAST:
-				lcd.print("TOO FAST");
+				lcd.print("Hold scrum longer");//did not complete duration
 				break;
 			case UISPH_TOO_MUCH:
-				lcd.print("TOO MUCH");
+				lcd.print("Reduce "); //may be not needed
+				//TRUCK add a print to the lcd for when they are above the threshold and the buzzer is going off
 				break;
 			default:
 				lcd.print("?? ");

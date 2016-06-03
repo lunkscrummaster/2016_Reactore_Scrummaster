@@ -24,9 +24,10 @@
 //---------------------------------------#DEFINES---------------------------------------
 #define MILLIS_MAX 					4294967295
 
-#define INDIVIDUAL_SINK_RAISE      	360, 370   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
-#define POWER_SINK_RAISE           	360, 370  	// here are the pushback arm settings
+#define INDIVIDUAL_SINK_RAISE      	325, 380   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
+#define POWER_SINK_RAISE           	325, 380  	// here are the pushback arm settings
 #define STRENGTH_SINK_RAISE        	325, 330
+//#define RESET 						300, 325
 
 #define CHARGE_PRESSURE_TRIP  		400   		// if pressure over this, shutdown (400 means approx. 30 lbs) TRUCK
 #define CHARGE_DISTANCE_TRIP  		390   		// if sonar over this, shutdown
@@ -37,7 +38,7 @@
 #define MAS_LTS_OFF      			1
 #define MAS_LTS_ON       			2
 
-#define AVE_ARRAY_SIZE    			4
+#define AVE_ARRAY_SIZE    			5
 
 
 //---------------------------------------MasterSystem_CLASS---------------------------------------

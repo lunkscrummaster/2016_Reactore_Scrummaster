@@ -70,7 +70,6 @@ const byte ledDigits[] = {
  * Max possible values are just above ^^
 */
 void display_num(int number) {
-	Serial.print("display_num: "); Serial.println(number);
 
   if (number < LED_MIN)  number = LED_MIN;
   if (number > LED_MAX)  number = LED_MAX;
@@ -119,7 +118,6 @@ void Accustat::displayHeartbeat() {
 } // end Accustat::displayHeartbeat()
 
 //--------------------------ACCUSTAT_Constructor -----------------------------------------------------
-
 Accustat::Accustat() {
   beeperSetup();
   cooldownCounter = 0;
@@ -133,8 +131,11 @@ Accustat::Accustat() {
   mode = ASM_INDIVIDUAL;
   state = AS_QUIET;
   precharge = 0;
+  naturalPreCharge = 0;
+  aveTimerStart = false;
+  aveTimer=0;
 }
-/* --------------------------Accustat::loop()------------------------------------------------------------
+ /* --------------------------Accustat::loop()------------------------------------------------------------
  * #define AS_QUIET      0    #define AS_PREHIT     1   #define AS_HITTING    2 #define AS_POSTHIT    3
  * Called from: main loop
  * 1. Checks for pad hit to wake up machine
@@ -155,11 +156,17 @@ void Accustat::loop() {
   if (isEnabled() && state != AS_QUIET) {
     // update running sum
     int p = analogRead(aiAchievedPin); //read current value and assign to p
-
+    if(aveTimerStart==false){
+    	aveTimer = millis();
+    	aveTimerStart = true;
+    }else{
+    	aveTimer = millis()-aveTimer;
+    	aveTimerStart = false;
+    }
     pbAvg.update(p);//update the average, using the last read value
 
     int avg = pbAvg.getAverage(); //updated average
-    Serial.print("p: "); Serial.println(p);
+  //  Serial.print("p: "); Serial.println(p);
     switch (state) {
       case AS_PREHIT: {
           int diff = p - avg; //difference between the current and average reading
@@ -288,7 +295,7 @@ void Accustat::saveHiddenPeak() {
 */
 void Accustat::enterState(byte newState) {
   state = newState;
-  Serial.print("Accustat enterState: "); Serial.println(newState);
+//  Serial.print("Accustat enterState: "); Serial.println(newState);
   switch (state) {
     case AS_QUIET:
       displayAlternateIndex = DISPLAYMODE_ALTERNATE; // this code indicates "alternate between current peak and session peak"
@@ -349,9 +356,9 @@ void Accustat::heartbeat() {
             We changed the equation to what we got from the data that was supplised by Kevin
         */
         //changed this equation to fit experimentally acquired data
-        int x = lastReading - NATURAL_PRECHARGE;
+        int x = lastReading - naturalPreCharge;
         int disp = ((-6) * (10 ^ (-10)) * (x ^ 6)) + (4 * (10 ^ (-7)) * (x ^ 5)) - (1 * (10 ^ (-4)) * (x ^ 4)) + (0.0111 * (x ^ 3)) - (0.3613 * (x ^ 2)) + (11.237 * x);
-        Serial.print("lastRead: "); Serial.print(lastReading);Serial.print(" display: "); Serial.println(disp);
+        //Serial.print("lastRead: "); Serial.print(lastReading);Serial.print(" display: "); Serial.println(disp);
         if (disp < 0)
           disp = -disp;
         /*
@@ -466,5 +473,25 @@ boolean Accustat::getHasSeenBall(){
 */
 void Accustat::setHasSeenBall(boolean ball){
 	hasSeenBall = ball;
+}
+
+/* ---------------------------------------Accustat::setNaturalPreCharge()---------------------------------------
+ *
+ *
+*/
+void Accustat::setNaturalPreCharge(void){
+	pbAvg.reset();
+	for(int i = 0; i < AVG_NUM_READINGS; i++){
+		pbAvg.update(analogRead(aiAchievedPin));
+	}
+	naturalPreCharge = pbAvg.getAverage();
+}
+
+/* ---------------------------------------Accustat::getNaturalPreCharge()---------------------------------------
+ *
+ *
+*/
+int Accustat::getNaturalPreCharge(void){
+	return naturalPreCharge;
 }
 
