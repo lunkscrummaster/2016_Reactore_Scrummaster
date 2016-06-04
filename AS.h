@@ -71,6 +71,12 @@ class Accustat {
     int aveTimer;
     bool aveTimerStart;
 
+    int  sessionPeak;
+    int  currentPeak;  // displayed on LED
+    int  hiddenPeak;   // Power/Strength peak displayed at end of cycle, not during cycle
+    int  precharge;
+    int  lastReading;
+
   private:
     int naturalPreCharge;
     byte state; // one of AS_
@@ -84,11 +90,11 @@ class Accustat {
 
     //Averager pbAvg;  // to smooth out pushback pressure readings
 
-    int  sessionPeak;
-    int  currentPeak;  // displayed on LED
-    int  hiddenPeak;   // Power/Strength peak displayed at end of cycle, not during cycle
-    int  precharge;
-    int  lastReading;
+//    int  sessionPeak;
+//    int  currentPeak;  // displayed on LED
+//    int  hiddenPeak;   // Power/Strength peak displayed at end of cycle, not during cycle
+//    int  precharge;
+//    int  lastReading;
     byte cooldownCounter;  // mainly for Individual mode (weak hits & bounces)
 
     byte  displayAlternateCountdown;  // counts heartbeats until next alternate

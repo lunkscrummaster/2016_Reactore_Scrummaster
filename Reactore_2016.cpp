@@ -152,12 +152,12 @@ void loop() {
 void sonarISR() {                 //****added to constanty read pushback sonar. can add master shutdown control here later.
 
 	int oldReading = master.pushbackSonar[master.pushbackIndex];
-	int temp =  analogRead(aiPushbackSonar)*5;
+	int temp =  analogRead(aiPushbackSonar);
 //	master.pushbackSonar[master.pushbackIndex] = analogRead(aiPushbackSonar);
 //	while(master.pushbackSonar[master.pushbackIndex] > 400 || master.pushbackSonar[master.pushbackIndex] < 290){
 //		master.pushbackSonar[master.pushbackIndex] = analogRead(aiPushbackSonar);
 //	}
-	if(temp > 400 || temp < 290){
+	if(temp > 80 || temp < 58){
 		if(master.pushbackIndex == 0){
 			master.pushbackSonar[master.pushbackIndex] = master.pushbackSonar[AVE_ARRAY_SIZE-1];
 		}else{
@@ -204,10 +204,10 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------
 void initPushbackAve(){
 	  for (int i = 0; i < AVE_ARRAY_SIZE; i++) {
-	    master.pushbackSonar[i] = analogRead(aiPushbackSonar)*5; //fill pushback sonar array
+	    master.pushbackSonar[i] = analogRead(aiPushbackSonar); //fill pushback sonar array
 	    master.pushbackSonarAve += master.pushbackSonar[i]/AVE_ARRAY_SIZE;
-	    master.outriggerTightSonar[i] = analogRead(aiOutriggerTightSonar)*5;
-	    master.outriggerLooseSonar[i] = analogRead(aiOutriggerLooseSonar)*5;
+	    master.outriggerTightSonar[i] = analogRead(aiOutriggerTightSonar);
+	    master.outriggerLooseSonar[i] = analogRead(aiOutriggerLooseSonar);
 	  }
 }
 

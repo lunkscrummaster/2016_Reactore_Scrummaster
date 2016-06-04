@@ -125,13 +125,16 @@ void UISystem::setModVarInfo(byte vn, byte col, byte row, byte width, int val,
  5. Then based on the current state, and the button presses, enter a new state
  */
 void UISystem::loop() {
-//	lcd.setCursor(0, 3);
-//	lcd.print(analogRead(aiAchievedPin));
-//	lcd.print("  ");
-//	lcd.print(accustat.pbAvg.getAverage());
-//	lcd.print("  ");
+	lcd.setCursor(0, 3);
 //	lcd.print(accustat.getNaturalPreCharge());
-//	lcd.setCursor(0,2);
+	lcd.print(accustat.sessionPeak);
+	lcd.print(" ");
+	lcd.print(accustat.currentPeak);
+	lcd.print(" ");
+	lcd.print(accustat.hiddenPeak);
+	lcd.print(" ");
+	lcd.print(accustat.lastReading);
+	//lcd.setCursor(0,2);
 //	lcd.print("                ");
 //	lcd.setCursor(0, 2);
 //	lcd.print(mainTime);

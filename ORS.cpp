@@ -43,9 +43,10 @@ void OutriggerSystem::loop() {
       } else if (ld - td > ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, LOW);
       } else { // end 1st else
-    	  setBalanceMode(false);
     	  delay(100);
     	  accustat.setNaturalPreCharge();
+    	  setBalanceMode(false);
+
       }//ends last else
 /*
       if (digitalRead(oOutriggerLooseUp)) {

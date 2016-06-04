@@ -43,7 +43,7 @@ void MasterSystem::loop() {
 
   if (strengthChargeTimeoutMillis > 0) {
 	noInterrupts();
-    int son = pushbackSonarAve;
+    volatile int son = pushbackSonarAve;
     interrupts();
     int pres = analogRead(aiAchievedPin);
 
@@ -301,8 +301,8 @@ int MasterSystem::getOutriggerTightAve() {
     2. Returns the latest calculated average
 */
 void MasterSystem::updateOutriggerLooseArray() {
-	outriggerLooseSonar[outriggerLooseIndex] = analogRead(aiOutriggerLooseSonar)*5;
-	if(outriggerLooseSonar[outriggerLooseIndex] > 600 || outriggerLooseSonar[outriggerLooseIndex] < 290){
+	outriggerLooseSonar[outriggerLooseIndex] = analogRead(aiOutriggerLooseSonar);
+	if(outriggerLooseSonar[outriggerLooseIndex] > 120 || outriggerLooseSonar[outriggerLooseIndex] < 58){
 				if(outriggerLooseIndex == 0){
 					outriggerLooseSonar[outriggerLooseIndex] = outriggerLooseSonar[AVE_ARRAY_SIZE-1];
 				}else{
@@ -321,8 +321,8 @@ void MasterSystem::updateOutriggerLooseArray() {
     2. Returns the latest calculated average
 */
 void MasterSystem::updateOutriggerTightArray() {
-	outriggerTightSonar[outriggerTightIndex] = analogRead(aiOutriggerTightSonar)*5;
-	if(outriggerTightSonar[outriggerTightIndex] > 600 || outriggerTightSonar[outriggerTightIndex] < 290){
+	outriggerTightSonar[outriggerTightIndex] = analogRead(aiOutriggerTightSonar);
+	if(outriggerTightSonar[outriggerTightIndex] > 120 || outriggerTightSonar[outriggerTightIndex] < 58){
 				if(outriggerTightIndex == 0){
 					outriggerTightSonar[outriggerTightIndex] = outriggerTightSonar[AVE_ARRAY_SIZE-1];
 				}else{
@@ -338,16 +338,16 @@ void MasterSystem::updateOutriggerTightArray() {
 //-------------------------------------------fillOutriggerArray------------------------------------------------------------------
 void MasterSystem::fillOutriggerArray(){
 	for(int i = 0; i < AVE_ARRAY_SIZE; i++){
-		outriggerLooseSonar[i] = analogRead(aiOutriggerLooseSonar)*5;
-		outriggerTightSonar[i] = analogRead(aiOutriggerTightSonar)*5;
-		if(outriggerLooseSonar[i] > 600 || outriggerLooseSonar[i] < 290){
+		outriggerLooseSonar[i] = analogRead(aiOutriggerLooseSonar);
+		outriggerTightSonar[i] = analogRead(aiOutriggerTightSonar);
+		if(outriggerLooseSonar[i] > 120 || outriggerLooseSonar[i] < 58){
 			if(i == 0){
 				outriggerLooseSonar[i] = outriggerLooseSonar[AVE_ARRAY_SIZE-1];
 			}else{
 				outriggerLooseSonar[i] = outriggerLooseSonar[i-1];
 			}
 		}
-		if(outriggerTightSonar[i] > 600 || outriggerTightSonar[i] < 290){
+		if(outriggerTightSonar[i] > 120 || outriggerTightSonar[i] < 58){
 			if(i == 0){
 				outriggerTightSonar[i] = outriggerTightSonar[AVE_ARRAY_SIZE-1];
 			}else{

@@ -156,28 +156,26 @@ void Accustat::loop() {
   if (isEnabled() && state != AS_QUIET) {
     // update running sum
     int p = analogRead(aiAchievedPin); //read current value and assign to p
-    if(aveTimerStart==false){
-    	aveTimer = millis();
-    	aveTimerStart = true;
-    }else{
-    	aveTimer = millis()-aveTimer;
-    	aveTimerStart = false;
-    }
     pbAvg.update(p);//update the average, using the last read value
 
     int avg = pbAvg.getAverage(); //updated average
-  //  Serial.print("p: "); Serial.println(p);
+//    Serial.print("p: "); Serial.print(p); Serial.print(" avg: "); Serial.println(avg);
+//    Serial.print(" diff: "); Serial.println(p-avg);
     switch (state) {
       case AS_PREHIT: {
-          int diff = p - avg; //difference between the current and average reading
-          if (diff > HIT_TRIP) { //#define HIT_TRIP     6 ???? confirm this operation wrt #define (HIT_TRIP) based on reading during operation
-            if (mode == ASM_INDIVIDUAL)
-              lastReading = p;
+//          int diff = p - avg; //difference between the current and average reading
+    	  int diff = avg - naturalPreCharge;
+          if (diff > HIT_TRIP && outriggers.getBalanceMode() == false) { //#define HIT_TRIP     6 ???? confirm this operation wrt #define (HIT_TRIP) based on reading during operation
+           Serial.print(" avg: "); Serial.print(avg); Serial.print(" naturalprecharge: "); Serial.println(naturalPreCharge);
+        	  if (mode == ASM_INDIVIDUAL){
+              lastReading = avg;
+              Serial.print(" hit trip success");
+            }
             else
               lastReading = avg;
-            enterState(AS_HITTING);//enter AS_HITTING since the pads are being hit
+            enterState(AS_HITTING);		//enter AS_HITTING since the pads are being hit
           } else
-            lastReading = avg;//assign the last reading to the average
+            lastReading = avg;			//assign the last reading to the average
         }//end case AS_PREHIT
         break;
       /*
@@ -189,9 +187,12 @@ void Accustat::loop() {
       case AS_HITTING:
         switch (mode) {
           case ASM_INDIVIDUAL:
-            if (lastReading < p)
-              // update peak reading
-              lastReading = p;
+        	  if (lastReading < avg){
+        		  lastReading = avg;
+        	  }
+//            if (lastReading < p)
+//              // update peak reading
+//              lastReading = p;
             break;
           case ASM_POWER: //since no break, will execute ASM_STRENGTH even though its ASM_POWER
           case ASM_STRENGTH:
@@ -295,7 +296,7 @@ void Accustat::saveHiddenPeak() {
 */
 void Accustat::enterState(byte newState) {
   state = newState;
-//  Serial.print("Accustat enterState: "); Serial.println(newState);
+  Serial.print("Accustat enterState: "); Serial.println(newState);
   switch (state) {
     case AS_QUIET:
       displayAlternateIndex = DISPLAYMODE_ALTERNATE; // this code indicates "alternate between current peak and session peak"
@@ -318,8 +319,7 @@ void Accustat::enterState(byte newState) {
     case AS_POSTHIT:
       DEBUG_PRINT_S(" AS->POSTHIT\n\n");
       digitalWrite(oBeeper, LOW); //turn off any noise
-      if (mode == ASM_POWER || mode == ASM_STRENGTH)
-      {
+      if (mode == ASM_POWER || mode == ASM_STRENGTH){
         currentPeak = hiddenPeak;
       }
       if (sessionPeak < currentPeak) {
@@ -357,8 +357,10 @@ void Accustat::heartbeat() {
         */
         //changed this equation to fit experimentally acquired data
         int x = lastReading - naturalPreCharge;
+//        if (x < 0)
+//        	x = 0;
         int disp = ((-6) * (10 ^ (-10)) * (x ^ 6)) + (4 * (10 ^ (-7)) * (x ^ 5)) - (1 * (10 ^ (-4)) * (x ^ 4)) + (0.0111 * (x ^ 3)) - (0.3613 * (x ^ 2)) + (11.237 * x);
-        //Serial.print("lastRead: "); Serial.print(lastReading);Serial.print(" display: "); Serial.println(disp);
+        Serial.print(" x: "); Serial.print(x);Serial.print(" display: "); Serial.println(disp);
         if (disp < 0)
           disp = -disp;
         /*
@@ -371,6 +373,7 @@ void Accustat::heartbeat() {
           case ASM_INDIVIDUAL:
             if (currentPeak < disp) {
               currentPeak = disp;
+              Serial.print("  current peak set to disp  ");
               // beep for passing current peak?
             } // end if (currentPeak < disp)
             break;
@@ -418,20 +421,32 @@ void Accustat::heartbeat() {
           beep(BEEP_NEW_SESS_PEAK);
         }
 
-        if (cooldownCounter > 0)
-          cooldownCounter--;
-        else {
-          switch (mode) {
-            case ASM_INDIVIDUAL:
-              enterState(AS_POSTHIT);
-              break;
-            case ASM_POWER:
-            case ASM_STRENGTH:
-              if (disp < 50)
-                enterState(AS_POSTHIT);
-              break;
-          }// end switch (mode)
-        }//closes else ie cooldownCounter = 0
+
+
+
+        if(returnState() == ASM_INDIVIDUAL){
+        	if (currentPeak > 0 && pbAvg.getAverage() - naturalPreCharge < 10){
+        		enterState(AS_POSTHIT);
+        	}
+        }else{
+
+            if (cooldownCounter > 0)
+              cooldownCounter--;
+            else {
+              switch (mode) {
+                case ASM_INDIVIDUAL:
+//                  enterState(AS_POSTHIT);
+                  break;
+                case ASM_POWER:
+                case ASM_STRENGTH:
+                  if (disp < 50)
+                    enterState(AS_POSTHIT);
+                  break;
+              }// end switch (mode)
+            }//closes else ie cooldownCounter = 0
+        }
+
+
       } // end case AS_HITTING
       break;
 

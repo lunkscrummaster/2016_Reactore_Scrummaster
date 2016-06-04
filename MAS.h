@@ -24,13 +24,13 @@
 //---------------------------------------#DEFINES---------------------------------------
 #define MILLIS_MAX 					4294967295
 
-#define INDIVIDUAL_SINK_RAISE      	325, 380   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
-#define POWER_SINK_RAISE           	325, 380  	// here are the pushback arm settings
-#define STRENGTH_SINK_RAISE        	325, 330
+#define INDIVIDUAL_SINK_RAISE      	61, 75   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
+#define POWER_SINK_RAISE           	61, 75  	// here are the pushback arm settings
+#define STRENGTH_SINK_RAISE        	61, 65
 //#define RESET 						300, 325
 
 #define CHARGE_PRESSURE_TRIP  		400   		// if pressure over this, shutdown (400 means approx. 30 lbs) TRUCK
-#define CHARGE_DISTANCE_TRIP  		390   		// if sonar over this, shutdown
+#define CHARGE_DISTANCE_TRIP  		78   		// if sonar over this, shutdown
 
 #define STRENGTH_POSTHIT_HEARTBEATS   (2 * HEARTBEATS_PER_SECOND)	// how long to wait after Strength Charge completes (Success or Shutdown)
 

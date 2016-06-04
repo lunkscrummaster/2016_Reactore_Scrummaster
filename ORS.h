@@ -17,7 +17,7 @@
 #include "pinDefs.h"
 
 //--------------------------------------#DEFINES--------------------------------------
-#define ORS_BALANCE_TRIP  10   		// raises outrigger when sonars differ by more than this
+#define ORS_BALANCE_TRIP  1   		// raises outrigger when sonars differ by more than this
 #define BALANCE_PERIOD    100 		//in microseconds
 
 //--------------------------------------OUTRIGGERS_CLASS--------------------------------------
