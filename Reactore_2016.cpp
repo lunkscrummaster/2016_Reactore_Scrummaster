@@ -190,15 +190,22 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 		if (moving to fast)
 		shutdown
 	*/
-	if (accustat.returnState() == AS_HITTING){			//checks for ball if, if it should be checking, aka accustat.state === hitting
-        if (accustat.getHasSeenBall()==false){
-        	//check for ball
-        	noInterrupts();
-        	if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70)
-        			accustat.setHasSeenBall(true); //ball has been seen
-        	interrupts();
-        }// end if
-	}
+	//TRUCK, NO POINT TO CHECK FOR BALLS WHEN INDIVIDUAL
+	/* original was if (accustat.returnState() == AS_HITTING)
+	 * no point checking for a ball if we are in indiviual mode
+	*/
+//	if (accustat.returnState() == AS_HITTING){			//checks for ball if, if it should be checking, aka accustat.state === hitting
+    if (accustat.returnState() == AS_HITTING ) {
+    	if (accustat.returnmode() == ASM_POWER || accustat.returnmode() == ASM_STRENGTH) {
+    			if (accustat.getHasSeenBall()==false){
+    					//check for ball
+    					noInterrupts();
+    						if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70)
+    							accustat.setHasSeenBall(true); //ball has been seen
+    					interrupts();
+    			} // end if
+    	} // end if (accustat.returnmode() == ASM_POWER || accustat.returnmode() == ASM_STRENGTH)
+	} // end if (accustat.returnState() == AS_HITTING )
 } // end sonarISR()
 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------

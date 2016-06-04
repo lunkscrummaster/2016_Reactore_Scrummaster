@@ -175,11 +175,11 @@ void MasterSystem::heartbeat() {
 
 /* ------------------------------------------MasterSystem::pushbackIsReady()------------------------------------------
     This function is called from PushbackSystem::heartbeat()
-    1. reset the timeout and accustat.resume() just does this : enterState(AS_PREHIT); in accustat
+    1. reset the timeout just does this : enterState(AS_PREHIT); in accustat
     // called by PushbackSystem when Ready cycle has finished
 */
 void MasterSystem::pushbackIsReady() {
-  accustat.resume();
+//  accustat.resume(); this makes the accustat enter prehit before the machine is done moving
   strengthChargeTimeoutMillis = 0;
 } // end MasterSystem::pushbackIsReady()
 

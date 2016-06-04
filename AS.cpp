@@ -171,8 +171,9 @@ void Accustat::loop() {
               lastReading = avg;
               Serial.print(" hit trip success");
             }
-            else
+            else {
               lastReading = avg;
+            }
             enterState(AS_HITTING);		//enter AS_HITTING since the pads are being hit
           } else
             lastReading = avg;			//assign the last reading to the average
@@ -359,8 +360,9 @@ void Accustat::heartbeat() {
         int x = lastReading - naturalPreCharge;
 //        if (x < 0)
 //        	x = 0;
-        int disp = ((-6) * (10 ^ (-10)) * (x ^ 6)) + (4 * (10 ^ (-7)) * (x ^ 5)) - (1 * (10 ^ (-4)) * (x ^ 4)) + (0.0111 * (x ^ 3)) - (0.3613 * (x ^ 2)) + (11.237 * x);
-        Serial.print(" x: "); Serial.print(x);Serial.print(" display: "); Serial.println(disp);
+//        int disp = ((-6) * (10 ^ (-10)) * (x ^ 6)) + (4 * (10 ^ (-7)) * (x ^ 5)) - (1 * (10 ^ (-4)) * (x ^ 4)) + (0.0111 * (x ^ 3)) - (0.3613 * (x ^ 2)) + (11.237 * x);
+        Serial.print(" x: "); Serial.print(x);Serial.print(" display: "); Serial.println(x * 5);
+        int disp = x * 5;
         if (disp < 0)
           disp = -disp;
         /*
@@ -421,11 +423,9 @@ void Accustat::heartbeat() {
           beep(BEEP_NEW_SESS_PEAK);
         }
 
-
-
-
-        if(returnState() == ASM_INDIVIDUAL){
-        	if (currentPeak > 0 && pbAvg.getAverage() - naturalPreCharge < 10){
+        if(returnmode() == ASM_INDIVIDUAL){
+        	Serial.print("  average: "); Serial.print(pbAvg.getAverage()); Serial.print(" precharge "); Serial.print(naturalPreCharge);
+        	if (currentPeak > 0 && pbAvg.getAverage() - naturalPreCharge < 6){
         		enterState(AS_POSTHIT);
         	}
         }else{
