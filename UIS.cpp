@@ -126,14 +126,17 @@ void UISystem::setModVarInfo(byte vn, byte col, byte row, byte width, int val,
  */
 void UISystem::loop() {
 	lcd.setCursor(0, 3);
-//	lcd.print(accustat.getNaturalPreCharge());
+	lcd.print("                    ");
+	lcd.setCursor(0,3);
+	lcd.print(accustat.getNaturalPreCharge());
+	lcd.print(" ");
 	lcd.print(accustat.sessionPeak);
 	lcd.print(" ");
 	lcd.print(accustat.currentPeak);
 	lcd.print(" ");
 	lcd.print(accustat.hiddenPeak);
 	lcd.print(" ");
-	lcd.print(accustat.lastReading);
+//	lcd.print(accustat.getNauralP);
 	//lcd.setCursor(0,2);
 //	lcd.print("                ");
 //	lcd.setCursor(0, 2);

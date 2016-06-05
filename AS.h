@@ -27,7 +27,7 @@
 #define AS_HITTING    			2 			// currently being hit??
 #define AS_POSTHIT    			3 			// hit finished, and do something....?
 
-#define HIT_TRIP     			6      		// hit detected if sudden rise by this amount (raw pressure)
+#define HIT_TRIP     			4      		// hit detected if sudden rise by this amount (raw pressure)
 #define COOLDOWN_PERIODS  		8  			// minimum hitting phase is this number of heartbeats long
 
 //#define BEEP_COUNT_NEW_PEAK  	1 			// new peak for this cycle
@@ -42,9 +42,14 @@
 #define DISPLAYMODE_CURRPEAK   	4    		// this code indicates "display current peak"
 
 
+
 //--------------------------ACCUSTAT_CLASS------------------------------------------------------------
 class Accustat {
   public:
+
+	const int pressureArray[218];
+
+
     Accustat();
     void loop();
     void heartbeat(void);
@@ -70,6 +75,7 @@ class Accustat {
     int getNaturalPreCharge(void);
     int aveTimer;
     bool aveTimerStart;
+    bool earlyPush;
 
     int  sessionPeak;
     int  currentPeak;  // displayed on LED

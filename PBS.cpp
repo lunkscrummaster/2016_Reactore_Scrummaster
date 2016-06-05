@@ -33,7 +33,7 @@ void PushbackSystem::heartbeat() {
       if (readySinkTo >= son) {
         // start raising
         digitalWrite(oAirSpringLockout, HIGH);  //written high to allow air into the springs
-        Serial.println(" PBS heartbeat changed PBS State: left sinking, now raising ");
+        //Serial.println(" PBS heartbeat changed PBS State: left sinking, now raising ");
         enterState(PBS_READY2_RAISING);
       }
       break;
@@ -86,7 +86,7 @@ void PushbackSystem::enable(boolean en) {
 */
 void PushbackSystem::enterState(byte newState) {
   state = newState;
-  //  Serial.print ("pushback system new state: "); Serial.println(state);
+//    Serial.print ("pushback system new state: "); Serial.println(state);
   switch (state) {
     case PBS_QUIET:
       halSetPushbackUpDown(0);
