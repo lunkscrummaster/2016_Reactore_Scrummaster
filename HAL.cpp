@@ -162,7 +162,7 @@ void halSetup() {
  * Why does this retrun < 500 ?????????************************
 */
 boolean halIsTowScrumSwitchInTowing() {
-  return analogRead(aiScrumPin) < 500;
+  return analogRead(aiScrumPin) < 250;
 } // end halIsTowScrumSwitchInTowing
 
 

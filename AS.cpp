@@ -36,7 +36,7 @@ void beeperHeartbeat() {
 				if (beeperCountdown-- <= 1) {
 					// start or stop beeper
 					digitalWrite(oBeeper, (--beeperToDo & 1) ? HIGH : LOW); // write the beep on or off
-
+					Serial.print("beeperToDo :"); Serial.println((beeperToDo & 1));
 					beeperCountdown = BEEPER_PERIODS;
 				} // end if (beeperCountdown-- <= 1)
 			} else
@@ -480,7 +480,7 @@ void Accustat::heartbeat() {
 			break;
 		} // end switch (mode)
 
-		if (sessionPeak < currentPeak) {
+		if (sessionPeak < currentPeak) { //TRUCK this needs nested in some cases, so no beep during push
 			sessionPeak = currentPeak;
 			beep(BEEP_NEW_SESS_PEAK);
 		}

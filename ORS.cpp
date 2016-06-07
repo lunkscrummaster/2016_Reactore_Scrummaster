@@ -37,7 +37,7 @@ void OutriggerSystem::loop() {
     if (ld > 0 && td > 0) { // if both are reading good values
       if (ld - td < - ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, HIGH);
-        delay(30);
+        delay(50);
         digitalWrite(oOutriggerLooseUp, LOW);
         delay(200);
       } else if (ld - td > ORS_BALANCE_TRIP) {

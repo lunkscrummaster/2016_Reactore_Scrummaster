@@ -102,6 +102,7 @@ void PushbackSystem::enterState(byte newState) {
     case PBS_READY2_RAISING:
 //      Serial.println("PBS_READY2_RAISE called setBalanceMode");
       halSetPushbackUpDown(1);
+      Serial.println("PBS_Raising_Set_BalanceMode_True");
       outriggers.setBalanceMode(true); //beging to balance the machine
       break;
 

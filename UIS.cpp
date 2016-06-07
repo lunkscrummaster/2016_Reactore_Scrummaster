@@ -136,7 +136,7 @@ void UISystem::loop() {
 	lcd.print(" ");
 	lcd.print(accustat.hiddenPeak);
 	lcd.print(" ");
-//	lcd.print(accustat.getNauralP);
+	lcd.print(accustat.lastReading);
 	//lcd.setCursor(0,2);
 //	lcd.print("                ");
 //	lcd.setCursor(0, 2);
@@ -212,6 +212,7 @@ void UISystem::loop() {
 	case UIS_SCRUM_POWER:
 		if (modeWasPressed) {
 			enterState(UIS_SCRUM_STRENGTH);
+			Serial.println("UIS_SCRUM_POWER called ui.enterState");
 			accustat.reset();
 		} else if (setWasPressed) {
 			switch (cur_var) {
@@ -228,6 +229,8 @@ void UISystem::loop() {
 	case UIS_SCRUM_INDIVIDUAL:
 		if (modeWasPressed) {
 			enterState(UIS_SCRUM_POWER);
+			Serial.println("UIS_SCRUM_IND called ui.enterState");
+
 			accustat.reset();
 		} // Set, Adjust ignored
 		break;
@@ -235,6 +238,7 @@ void UISystem::loop() {
 	default:  // a Strength mode
 		if (modeWasPressed) {
 			enterState(UIS_SCRUM_INDIVIDUAL);
+			Serial.println("default ui loop case called enterState");
 			accustat.reset();
 		} else if (state == UIS_SCRUM_STRENGTH && setWasPressed) {
 			switch (cur_var) {
@@ -471,9 +475,10 @@ void UISystem::enterState(byte newState) {
 	//      lcd.setCursor(0, 1);  lcd.print("Reservoir Pressure:");
 	//      showVar(UIVN_TOWING_RESPRESS);
 	//  }
-	//    Serial.print("UIenterState called UImode: "); Serial.println(state);
-	if (master.getLastUIState() != state) {
+   // Serial.print("UIenterState called UImode: "); Serial.print(state); Serial.println("  lastUI: ");Serial.println(master.getLastUIState());
+    if (master.getLastUIState() != state) {
 		master.UIModeChanged(state);
+		Serial.println("ui.IF(last!=State)");
 	}
 } // end UISystem::enterState
 

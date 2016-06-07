@@ -16,7 +16,7 @@ MasterSystem::MasterSystem() {
   lastMillis = 0;
 
   lastUIState = UIS_TOWING;
-  lastTowSwitch = MAS_LTS_OFF;
+  lastTowSwitch = MAS_LTS_ON;
 
   outriggerLooseIndex = 0;
   outriggerLooseSonarAve = 0;
@@ -114,6 +114,7 @@ void MasterSystem::heartbeat() {
     if (lastTowSwitch != MAS_LTS_ON) {
       // enter Towing mode
       lastTowSwitch = MAS_LTS_ON;
+      Serial.println("MAS_LTS_ON from here");
       ui.enterState(UIS_TOWING); //display towing state
       digitalWrite(oDisplayPowerPin, LOW);
     }
@@ -122,6 +123,7 @@ void MasterSystem::heartbeat() {
       // exit Towing mode
       lastTowSwitch = MAS_LTS_OFF;
       ui.enterState(lastReadyState); //display last state
+      Serial.println("exit tow switch call ui.enterState");
       digitalWrite(oDisplayPowerPin, HIGH);
     }
   } // end else
@@ -198,8 +200,10 @@ void MasterSystem::accustatEnteringPosthit() {
       This timer will be edited by Kevin in the field to what his preference is.
     digitalWrite(oSuccess, LOW);  // just to make sure
   */
-  if (lastReadyState != UIS_SCRUM_INDIVIDUAL)
+  if (lastReadyState != UIS_SCRUM_INDIVIDUAL){
     ui.enterState(lastReadyState);
+    Serial.println("accustatEnterPostHit caused ghost");
+  }
 } //end MasterSystem::accustatEnteringPosthit
 
 
