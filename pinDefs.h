@@ -64,7 +64,7 @@
 #define iButtonPinMode                    11        // MENU BUTTON
 //???? looking at how it's wired, pin 13 looks like it is wired to pin 12
 // **** iTrailerPowerPin has been changed from pin 13, to pin 12. May 19, 2016
-/* iTrailerPowerPin ????
+/* iTrailerPowerPin ???? TRUCK THIS PIN IS BLOWN. NEEDS TO BE CHANGED
  *  This function has not been implemented yet.
  *  When pulled low, truck is plugged in.
  *  We are in towing mode.

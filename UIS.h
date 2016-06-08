@@ -71,6 +71,8 @@ class UISystem {
     //byte returnUIState();
     int mainTime;
     int heartTime;
+    int lb;
+    int tb;
 
   private:
 

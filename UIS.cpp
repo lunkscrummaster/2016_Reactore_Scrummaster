@@ -125,6 +125,9 @@ void UISystem::setModVarInfo(byte vn, byte col, byte row, byte width, int val,
  5. Then based on the current state, and the button presses, enter a new state
  */
 void UISystem::loop() {
+//	noInterrupts();
+//	Serial.print("looseBall: "); Serial.print(lb);	Serial.print(" TightBall: "); Serial.println(tb);
+//	interrupts();
 	lcd.setCursor(0, 3);
 	lcd.print("                    ");
 	lcd.setCursor(0,3);
@@ -137,6 +140,16 @@ void UISystem::loop() {
 	lcd.print(accustat.hiddenPeak);
 	lcd.print(" ");
 	lcd.print(accustat.lastReading);
+	lcd.setCursor(0,2);
+	lcd.print("                    ");
+	lcd.setCursor(0,2);
+	lcd.print(analogRead(aiAchievedPin));
+	lcd.print(" ");
+	lcd.print(lb);
+	lcd.print(" ");
+	lcd.print(tb);
+
+
 	//lcd.setCursor(0,2);
 //	lcd.print("                ");
 //	lcd.setCursor(0, 2);

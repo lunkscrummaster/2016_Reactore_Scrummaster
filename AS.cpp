@@ -36,11 +36,14 @@ void beeperHeartbeat() {
 				if (beeperCountdown-- <= 1) {
 					// start or stop beeper
 					digitalWrite(oBeeper, (--beeperToDo & 1) ? HIGH : LOW); // write the beep on or off
-					Serial.print("beeperToDo :"); Serial.println((beeperToDo & 1));
+					Serial.print("beeperToDo :"); Serial.println((beeperToDo));
 					beeperCountdown = BEEPER_PERIODS;
 				} // end if (beeperCountdown-- <= 1)
-			} else
+			} else {
 				digitalWrite(oBeeper, LOW);  // just to make sure
+//				Serial.println(" beeperFlag = false");
+				accustat.beeperFlag = false;
+			}
 			break;
 		}
 		case ASM_POWER:
@@ -121,6 +124,8 @@ void Accustat::displayHeartbeat() {
 	// if displayAlternateIndex == 0 then display sessionPeak else display currentPeak;
 	// this cycles so that it displays sessionPeak, currentPeak, currentPeak, currentPeak, ...
 	//Serial.print("dispAltInd: ");Serial.print(displayAlternateIndex); Serial.print("  sessionPeak: "); Serial.print(sessionPeak);Serial.print("  currentPeak: "); Serial.println(currentPeak);
+	if(currentPeak == 0)
+		displayAlternateIndex = 0;
 	display_num(displayAlternateIndex == 0 ? sessionPeak : currentPeak);
 
 	if (displayAlternateCountdown-- <= 1) {
@@ -179,7 +184,8 @@ pressureArray  						{0,    10,   20,   29,   39,   49,   59,   69,   78,   88,
 	aveTimerStart = false;
 	aveTimer = 0;
 	earlyPush = false;
-
+	beeperFlag = false;
+	lookForBall = false;
 }
 /* --------------------------Accustat::loop()------------------------------------------------------------
  * #define AS_QUIET      0    #define AS_PREHIT     1   #define AS_HITTING    2 #define AS_POSTHIT    3
@@ -243,7 +249,29 @@ void Accustat::loop() {
 				break;
 			case ASM_POWER: //since no break, will execute ASM_STRENGTH even though its ASM_POWER
 			case ASM_STRENGTH:
+				if(currentPeak < hiddenPeak)
+					saveHiddenPeak();
 				lastReading = avg;
+				if(hasSeenBall){
+					int presArrIndex = avg - naturalPreCharge;
+						if(presArrIndex < 0)
+							presArrIndex = 0;
+						float change = (float)pressureArray[presArrIndex]/(float)currentPeak;
+						//Serial.print(" pressureArray[presArrIndex]: "); Serial.print(pressureArray[presArrIndex]);
+						//Serial.print("  CurrPeak: "); Serial.print(currentPeak);
+						//Serial.print(" disp "); Serial.print(pressureArray[lastReading - naturalPreCharge]);
+//						Serial.print(" last reading: "); Serial.print(lastReading);
+//						Serial.print(" pressureArray[presArrIndex]: "); Serial.print(pressureArray[presArrIndex]);
+//						Serial.print("  CurrPeak: "); Serial.print(currentPeak);
+//						Serial.print(" chagne: "); Serial.println(change);
+
+						if (change < 0.6  && currentPeak > 0) {
+							enterState(AS_POSTHIT);
+							Serial.println(" hasSeenball false ");
+							setHasSeenBall(false);
+						}
+
+				}
 				break;
 			} // end switch (mode)
 			break;
@@ -336,7 +364,7 @@ void Accustat::saveHiddenPeak() {
  */
 void Accustat::enterState(byte newState) {
 	state = newState;
-//  Serial.print("Accustat enterState: "); Serial.println(newState);
+  Serial.print("Accustat enterState: "); Serial.println(newState);
 	switch (state) {
 	case AS_QUIET:
 		displayAlternateIndex = DISPLAYMODE_ALTERNATE; // this code indicates "alternate between current peak and session peak"
@@ -349,7 +377,9 @@ void Accustat::enterState(byte newState) {
 
 	case AS_HITTING:
 		DEBUG_PRINT_S("\n AS->HITTING\n");
-		hasSeenBall = false;
+		//hasSeenBall = false;
+		if(mode != ASM_INDIVIDUAL)
+			lookForBall = true;
 		cooldownCounter = COOLDOWN_PERIODS; // COOLDOWN_PERIODS  8 minimum hitting phase is this # of heartbeats long
 		precharge = lastReading;
 		currentPeak = hiddenPeak = 0; //reset the peaks
@@ -361,13 +391,19 @@ void Accustat::enterState(byte newState) {
 		digitalWrite(oBeeper, LOW); //turn off any noise
 		if (mode == ASM_POWER || mode == ASM_STRENGTH) {
 			currentPeak = hiddenPeak;
+
 		}
 		if (sessionPeak < currentPeak) {
 			sessionPeak = currentPeak; //reset new session peak
+			Serial.print("AS_POSTHIT INSIDE ENTERSTATE CALLED beep()");
 			beep(BEEP_NEW_SESS_PEAK); //#define BEEP_NEW_SESS_PEAK 2  // new peak since last powerup/reset
 		}
 		displayAlternateIndex = DISPLAYMODE_ALTERNATE; // this code indicates "alternate between current peak and session peak"
 		master.accustatEnteringPosthit(); //located in MAS.cpp
+		if(mode != ASM_INDIVIDUAL){
+			delay(250);
+			setNaturalPreCharge();
+		}
 		break;
 	} //end switch (state)
 } // end Accustat::enterState
@@ -398,36 +434,18 @@ void Accustat::heartbeat() {
 		int x = lastReading - naturalPreCharge;
         if (x < 0)
         	x = 0;
-//        int disp = ((-6) * (10 ^ (-10)) * (x ^ 6)) + (4 * (10 ^ (-7)) * (x ^ 5)) - (1 * (10 ^ (-4)) * (x ^ 4)) + (0.0111 * (x ^ 3)) - (0.3613 * (x ^ 2)) + (11.237 * x);
-		Serial.print(" diff: ");
-		Serial.print(x);
-//        int disp = 0;
-		//   if(x < 49){
-		//  	float disp1 = x * 5.04;
-		///  	disp = (int)disp1;
-		//  }else{
-//        	float disp1 = (-0.0002 * (x * x)) + (20.086 * x) - 289.07;
-//        	long double disp1 = ((-5.699)*(0.0000000001)*(x*x*x*x*x*x));
-//        	disp1 = disp1 + ((3.995)*(0.0000001)*(x*x*x*x*x));
-//        	disp1 = disp1 - ((0.0001)*(x*x*x*x));
-//        	disp1 = disp1 + ((0.0109)*(x*x*x));
-//        	disp1 = disp1 - ((0.3447)*(x*x));
-//        	disp1 = disp1 + ((10.643)*(x));
-//        	disp1 = disp1 + 6.7988;
-////        	long float disp1 = ((-5.699)*(0.0000000001)*(x*x*x*x*x*x)) + ((3.995)*(0.0000001)*(x*x*x*x*x)) - ((0.0001)*(x*x*x*x)) + ((0.0109)*(x*x*x)) - ((0.3447)*(x*x)) + ((10.643)*(x)) + 6.7988;
-//        	disp = (int)disp1;
-		//  }
-//        	Serial.print(" disp1:  "); Serial.print((float)disp1);
+//		Serial.print(" diff: ");
+//		Serial.print(x);
+
 		int disp = pressureArray[x];
-		Serial.print(" display: ");
-		Serial.print(disp);
-		Serial.print(" aianalogread: ");
-		Serial.println(analogRead(aiAchievedPin));
+//		Serial.print(" display: ");
+//		Serial.print(disp);
+//		Serial.print(" aianalogread: ");
+//		Serial.println(analogRead(aiAchievedPin));
 		/*
 		 // Accustat modes POSSIBLE MODES
 		 #define ASM_INDIVIDUAL  0 //individual just measure how strong someone is pushing
-		 #define ASM_POWER       1 ..?
-		 #define ASM_STRENGTH    2 ..?
+		 #define ASM_POWER       1 ..?		#define ASM_STRENGTH    2 ..?
 		 */
 		switch (mode) {
 		case ASM_INDIVIDUAL:
@@ -441,16 +459,22 @@ void Accustat::heartbeat() {
 		case ASM_POWER: {
 			if (disp > ENGAGED_MIN) {
 				int threshold = ui.getVar(UIVM_POWER_THRESHOLD) * 100;
+				//Serial.println(" hasSeenBall: "); //Serial.println(hasSeenBall);
 				if (disp <= threshold) {
 					if (hasSeenBall) {
+						//Serial.println(" ball true");
 						if (hiddenPeak < disp)
 							hiddenPeak = disp;
+				    	}else{
+				    		//Serial.println("disp < thresh, noBall");
 				    	}
 					} else {
-						if(!hasSeenBall){
+						if(lookForBall){
 							digitalWrite(oBeeper, HIGH);
-							Serial.print(" ***ball to early beep ");
+//							Serial.println(" ***ball to early beep ");
 							earlyPush = true;
+						}else{
+				    	//	Serial.println("disp > thresh, yesBall");
 						}
 					} // end else
 				 // closes if (disp > threshold)
@@ -482,7 +506,12 @@ void Accustat::heartbeat() {
 
 		if (sessionPeak < currentPeak) { //TRUCK this needs nested in some cases, so no beep during push
 			sessionPeak = currentPeak;
-			beep(BEEP_NEW_SESS_PEAK);
+	//		Serial.print(" current accustat state: "); Serial.println(accustat.returnState());
+//			Serial.print("if (sessionPeak < currentPeak) line 469 called beep()");
+			if(beeperFlag == false){
+				beeperFlag = true;
+				beep(BEEP_NEW_SESS_PEAK);
+			}
 		}
 
 		if (returnmode() == ASM_INDIVIDUAL) {
@@ -501,8 +530,29 @@ void Accustat::heartbeat() {
 					break;
 				case ASM_POWER:
 				case ASM_STRENGTH:
-					if (disp < 50)
+					if(currentPeak < hiddenPeak)
+						saveHiddenPeak();
+
+					int presArrIndex = analogRead(aiAchievedPin) - naturalPreCharge;
+					if(presArrIndex < 0)
+						presArrIndex = 0;
+					float change = (float)pressureArray[presArrIndex]/(float)currentPeak;
+					if (change < 0.6  && hasSeenBall == true && currentPeak > 0) {
+
+//					int avePB = pbAvg.getAverage();
+//					if(avePB < naturalPreCharge && hasSeenBall){
+						Serial.print("%Diff: "); Serial.print(change);
+						Serial.print("  Seen Ball: "); Serial.print(hasSeenBall);
+						Serial.print("  lastRead: "); Serial.print(lastReading);
+						Serial.print("  NAT_PRE: "); Serial.print(naturalPreCharge);
+						Serial.print("  currPeak: "); Serial.print(currentPeak);
+						Serial.print("  Look Flag: ");Serial.println(lookForBall);
 						enterState(AS_POSTHIT);
+						Serial.println(" hasSeenball false ");
+						setHasSeenBall(false);
+//						setNaturalPreCharge();
+					}
+
 					break;
 				} // end switch (mode)
 			} //closes else ie cooldownCounter = 0
@@ -545,7 +595,7 @@ boolean Accustat::getHasSeenBall() {
 
 /* ---------------------------------------Accustat::setHasSeenBall()---------------------------------------
  *  Called from: sonarISR in main page
- *  1. Returns the hasSeenBall
+ *  1. Sets hasSeenBall
  */
 void Accustat::setHasSeenBall(boolean ball) {
 	hasSeenBall = ball;

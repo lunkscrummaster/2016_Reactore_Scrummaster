@@ -86,7 +86,7 @@ void setup() {
 
   lcd.begin(20, 4); //sets up screen
 
-  heartbeatTimer.every(1000L / HEARTBEATS_PER_SECOND, heartbeat); //calls heartbeat function when timer goes off.
+  heartbeatTimer.every(100L / HEARTBEATS_PER_SECOND, heartbeat); //calls heartbeat function when timer goes off.
 
   chargeAlternateTimer.every(CHARGE_ALTERNATE_MINUTES * 60L * 1000, chargeAlternateCallback);
 
@@ -194,18 +194,30 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 	/* original was if (accustat.returnState() == AS_HITTING)
 	 * no point checking for a ball if we are in indiviual mode
 	*/
+	if(accustat.lookForBall == true){
+		noInterrupts();
+		if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70){
+			ui.lb = analogRead(aiLoose_ball_sonar);
+			ui.tb = analogRead(aiTight_ball_sonar);
+			accustat.setHasSeenBall(true);
+			accustat.lookForBall = false;
+		}
+		interrupts();
+	}
+
 //	if (accustat.returnState() == AS_HITTING){			//checks for ball if, if it should be checking, aka accustat.state === hitting
-    if (accustat.returnState() == AS_HITTING ) {
-    	if (accustat.returnmode() == ASM_POWER || accustat.returnmode() == ASM_STRENGTH) {
-    			if (accustat.getHasSeenBall()==false){
-    					//check for ball
-    					noInterrupts();
-    						if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70)
-    							accustat.setHasSeenBall(true); //ball has been seen
-    					interrupts();
-    			} // end if
-    	} // end if (accustat.returnmode() == ASM_POWER || accustat.returnmode() == ASM_STRENGTH)
-	} // end if (accustat.returnState() == AS_HITTING )
+//    if (accustat.returnState() == AS_HITTING ) {
+//    	if (accustat.returnmode() == ASM_POWER || accustat.returnmode() == ASM_STRENGTH) {
+//    			if (accustat.getHasSeenBall() == false){
+//    					//check for ball
+//    					noInterrupts();
+//    						if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70)
+//    							accustat.setHasSeenBall(true); //ball has been seen
+////    						Serial.println("BALL HAS BEEN SEEN SET TO TRUE");
+//    					interrupts();
+//    			} // end if
+//    	} // end if (accustat.returnmode() == ASM_POWER || accustat.returnmode() == ASM_STRENGTH)
+//	} // end if (accustat.returnState() == AS_HITTING )
 } // end sonarISR()
 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------

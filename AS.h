@@ -20,7 +20,7 @@
 #define ASM_STRENGTH    		2
 
 #define DISPLAY_FACTOR    		20			// raw pressure readings are multiplied by this for display
-#define ENGAGED_MIN       		150
+#define ENGAGED_MIN       		49
 
 #define AS_QUIET      			0 			// accustat states // sleep/ not being used
 #define AS_PREHIT     			1 			// awake, waiting for hit ??
@@ -37,7 +37,7 @@
 #define LED_DASH_CODE  			10			//DEFINES FOR LED DISPLAY
 #define LED_MIN  		   		-999		// max/min values that will fit in 4 digits
 #define LED_MAX  				9999
-#define DISPLAY_PERIOD  		4  			// Short-display period is this many heartbeats long
+#define DISPLAY_PERIOD  		40  			// Short-display period is this many heartbeats long
 #define DISPLAYMODE_ALTERNATE  	0    		// this code indicates "alternate between current peak and session peak"
 #define DISPLAYMODE_CURRPEAK   	4    		// this code indicates "display current peak"
 
@@ -76,12 +76,14 @@ class Accustat {
     int aveTimer;
     bool aveTimerStart;
     bool earlyPush;
+    bool lookForBall;
 
     int  sessionPeak;
     int  currentPeak;  // displayed on LED
     int  hiddenPeak;   // Power/Strength peak displayed at end of cycle, not during cycle
     int  precharge;
     int  lastReading;
+    bool beeperFlag;
 
   private:
     int naturalPreCharge;

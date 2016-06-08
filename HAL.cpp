@@ -86,7 +86,7 @@ int hal_ReadSonarMB7360(byte tries, byte pin) {
  *  1. The first part creates an arrary, and initalizes the pins to low
 */
 void halSetup() {
-  pinMode(iTrailerPowerPin, INPUT_PULLUP);
+  pinMode(iTrailerPowerPin, INPUT);
   byte outPins[] = {
     LOW,  oPushbackArmDownPin,
     LOW,  oPushbackArmUpPin,
@@ -162,7 +162,7 @@ void halSetup() {
  * Why does this retrun < 500 ?????????************************
 */
 boolean halIsTowScrumSwitchInTowing() {
-  return analogRead(aiScrumPin) < 250;
+  return analogRead(aiScrumPin) < 200;
 } // end halIsTowScrumSwitchInTowing
 
 
@@ -185,8 +185,9 @@ void halSetPushbackUpDown(int dir) {
 	if(dir == 1){
 		  digitalWrite(oPushbackArmDownPin, LOW);
 		  digitalWrite(oPushbackArmUpPin, HIGH);
-		  delay(75);
+		  delay(50);
 		  digitalWrite(oPushbackArmUpPin, LOW);
+		  delay(50);
 	}else{
 	  digitalWrite(oPushbackArmDownPin, dir < 0 ? HIGH : LOW);
 	  digitalWrite(oPushbackArmUpPin,   dir > 0 ? HIGH : LOW);

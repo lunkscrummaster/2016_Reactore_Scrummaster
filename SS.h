@@ -17,7 +17,7 @@
 
 //-----------------------------------------#DEFINES-----------------------------------------
 // sleeps after this long (must be <= 136 minutes or 'timeoutHeartbeats' will overflow)
-#define SLEEP_TIMEOUT_SECONDS	(15 * 60) 		//original SLEEP_TIMEOUT_SECONDS  (15 * 60)
+#define SLEEP_TIMEOUT_SECONDS	(15 * 60 * 5) 		//original SLEEP_TIMEOUT_SECONDS  (15 * 60) added * 10 to make change in heartbeat time.
 
 #define SSS_ASLEEP  			0 				//System is ASLEEP
 #define SSS_AWAKE   			1 				//System is AWAKE

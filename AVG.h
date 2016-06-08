@@ -15,7 +15,7 @@
 
 
 //-----------------------------------#DEFINES--------------------------------------
-#define AVG_NUM_READINGS  10
+#define AVG_NUM_READINGS  5
 
 
 //-----------------------------------AVERAGE_CLASS--------------------------------------
@@ -28,6 +28,8 @@ class Averager {
     void reset(void);
 
     int getAverage(void);
+
+
 
   private:
     byte  readingCount;

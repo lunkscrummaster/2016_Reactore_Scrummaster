@@ -106,18 +106,20 @@ void MasterSystem::loop() {
     3. Does some more stuff that I DON'T UNDERSTAND RIGHT NOW
 */
 void MasterSystem::heartbeat() {
-
+//Serial.print(" Tight ball: "); Serial.println(analogRead(aiTight_ball_sonar));
   //  Serial.println("Master System Heartbeat Started");
-
+//Serial.print(" iTrailerPowerPin status: "); Serial.println(digitalRead(iTrailerPowerPin));
   // check towing switch
   if (halIsTowScrumSwitchInTowing()) {
-    if (lastTowSwitch != MAS_LTS_ON) {
-      // enter Towing mode
-      lastTowSwitch = MAS_LTS_ON;
-      Serial.println("MAS_LTS_ON from here");
-      ui.enterState(UIS_TOWING); //display towing state
-      digitalWrite(oDisplayPowerPin, LOW);
-    }
+	  if(halIsTowScrumSwitchInTowing()){
+		if (lastTowSwitch != MAS_LTS_ON) {
+		  // enter Towing mode
+		  lastTowSwitch = MAS_LTS_ON;
+		  Serial.println("MAS_LTS_ON from here");
+		  ui.enterState(UIS_TOWING); //display towing state
+		  digitalWrite(oDisplayPowerPin, LOW);
+		}
+	  }
   } else {
     if (lastTowSwitch != MAS_LTS_OFF) {
       // exit Towing mode
@@ -202,7 +204,8 @@ void MasterSystem::accustatEnteringPosthit() {
   */
   if (lastReadyState != UIS_SCRUM_INDIVIDUAL){
     ui.enterState(lastReadyState);
-    Serial.println("accustatEnterPostHit caused ghost");
+    Serial.print(" lastState :"); Serial.print(lastReadyState); Serial.print("UIState");Serial.println(ui.getState());
+    //Serial.println("accustatEnterPostHit caused ghost");
   }
 } //end MasterSystem::accustatEnteringPosthit
 
