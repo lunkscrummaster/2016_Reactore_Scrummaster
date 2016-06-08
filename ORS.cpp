@@ -39,7 +39,7 @@ void OutriggerSystem::loop() {
         digitalWrite(oOutriggerLooseUp, HIGH);
         delay(50);
         digitalWrite(oOutriggerLooseUp, LOW);
-        delay(200);
+        delay(150);
       } else if (ld - td > ORS_BALANCE_TRIP) {
         digitalWrite(oOutriggerLooseUp, LOW);
       } else { // end 1st else

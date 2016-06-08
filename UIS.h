@@ -73,6 +73,9 @@ class UISystem {
     int heartTime;
     int lb;
     int tb;
+    bool pbTooFar;
+
+    int accustatDiff;
 
   private:
 

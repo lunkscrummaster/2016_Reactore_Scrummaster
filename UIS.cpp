@@ -87,6 +87,8 @@ UISystem::UISystem(LiquidCrystal &lc) :
 
 	lcd.clear();
 	lcd.noDisplay();
+	pbTooFar = false;
+	accustatDiff = 0;
 }
 
 /* ------------------------------------------UISystem::setNonModVarInfo------------------------------------------
@@ -145,10 +147,15 @@ void UISystem::loop() {
 	lcd.setCursor(0,2);
 	lcd.print(analogRead(aiAchievedPin));
 	lcd.print(" ");
-	lcd.print(lb);
-	lcd.print(" ");
-	lcd.print(tb);
-
+	lcd.print(accustatDiff);
+//	lcd.print(" ");
+//	lcd.print(lb);
+//	lcd.print(" ");
+//	lcd.print(tb);
+if(pbTooFar == true){
+	pbTooFar = false;
+	Serial.println("EmergencyShutDown");
+}
 
 	//lcd.setCursor(0,2);
 //	lcd.print("                ");
@@ -442,6 +449,7 @@ void UISystem::enterState(byte newState) {
 		// Below is when the machine is pushing back
 	case UIS_SCRUM_STRENGTH_CHARGE:
 		initcharge.enable(false);  // lock in Init Charge pressure
+		Serial.println("UI = Charge");
 		halSetPushbackDumpValve(HIGH);
 		lcd.print(" STRENGTH TRAINING ");
 		lcd.setCursor(6, 2);

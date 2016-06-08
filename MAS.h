@@ -24,9 +24,9 @@
 //---------------------------------------#DEFINES---------------------------------------
 #define MILLIS_MAX 					4294967295
 
-#define INDIVIDUAL_SINK_RAISE      	61, 75   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
-#define POWER_SINK_RAISE           	61, 75  	// here are the pushback arm settings
-#define STRENGTH_SINK_RAISE        	61, 65
+#define INDIVIDUAL_SINK_RAISE      	61, 70   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
+#define POWER_SINK_RAISE           	61, 70  	// here are the pushback arm settings
+#define STRENGTH_SINK_RAISE        	61, 60
 //#define RESET 						300, 325
 
 #define CHARGE_PRESSURE_TRIP  		400   		// if pressure over this, shutdown (400 means approx. 30 lbs) TRUCK

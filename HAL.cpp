@@ -201,6 +201,9 @@ void halSetPushbackUpDown(int dir) {
 */
 void halSetPushbackDumpValve(byte level) {
   digitalWrite(oPushbackDumpValve, level);
+  if (level == HIGH) {
+	  Serial.println("  AIR DUMPED ");
+  }
 } // end halSetPushbackDumpValve
 
 

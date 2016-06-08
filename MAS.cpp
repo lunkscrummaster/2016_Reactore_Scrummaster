@@ -246,7 +246,7 @@ void MasterSystem::UIModeChanged(byte uis) {
 
     case UIS_SCRUM_STRENGTH_CHARGE:
       lastMillis = millis();
-      strengthChargeTimeoutMillis = ui.getVar(UIVM_STRENGTH_DURATION) * 1000L;
+      strengthChargeTimeoutMillis = ui.getVar(UIVM_STRENGTH_DURATION) * 10000L;
       break;
 
     case UIS_SCRUM_STRENGTH_POSTHIT:
