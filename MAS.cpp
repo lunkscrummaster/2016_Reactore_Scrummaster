@@ -26,6 +26,11 @@ MasterSystem::MasterSystem() {
 
   pushbackSonarAve = 0;
   pushbackIndex = 0;
+
+  noInterrupts = false;
+  successOverFlag_AS = false;
+  successOverFlag_UI = false;
+
 }
 
 
@@ -42,17 +47,17 @@ void MasterSystem::loop() {
 	}
 
   if (strengthChargeTimeoutMillis > 0) {
-	noInterrupts();
+	master.noInterrupts = true;
     volatile int son = pushbackSonarAve;
-    interrupts();
+    master.noInterrupts = false;
     int pres = analogRead(aiAchievedPin);
 
-    if (son > CHARGE_DISTANCE_TRIP) { //#define CHARGE_DISTANCE_TRIP  390   // if sonar over this, shutdown
-      // if sonar too high,
-      strengthChargeTimeoutMillis = 0;
-      ui.goStrengthPosthit(UISPH_TOO_HIGH, son - CHARGE_DISTANCE_TRIP);//this just updates the lcd screen display
-      return;
-    }
+//    if (son > CHARGE_DISTANCE_TRIP) { //#define CHARGE_DISTANCE_TRIP  390   // if sonar over this, shutdown
+//      // if sonar too high,
+//      strengthChargeTimeoutMillis = 0;
+//      ui.goStrengthPosthit(UISPH_TOO_HIGH, son - CHARGE_DISTANCE_TRIP);//this just updates the lcd screen display
+//      return;
+//    }
 
     // check sonar speed
     //  long sonarMillis = millis();
@@ -68,6 +73,7 @@ void MasterSystem::loop() {
     // check pushback pressure TRUCK, the valve should blow off right KEVIN?
     if (pres > CHARGE_PRESSURE_TRIP) {  //#define CHARGE_PRESSURE_TRIP  400   // if pressure over this, shutdown (400 means approx. 30 lbs)
       // if pushback pressure too much,
+    	Serial.println("too much pressure - timeout reset");
       strengthChargeTimeoutMillis = 0;
       ui.goStrengthPosthit(UISPH_TOO_MUCH, pres - CHARGE_PRESSURE_TRIP);
       return;
@@ -78,19 +84,39 @@ void MasterSystem::loop() {
         Rollover is taken into account here.
     */
     // check for Duration timeout
-    long m = millis();
-    long elapsedMillis = 0;
-    if (m > lastMillis)
-      elapsedMillis = m - lastMillis;
+    unsigned long m = millis();
+    unsigned long elapsedMillis = 0;
+//    Serial.print(" m: "); Serial.print(m); Serial.print("  lastMillis: ");Serial.print(lastMillis);
+    if (m < lastMillis) {
+        elapsedMillis =(unsigned long)(m + (MILLIS_MAX - lastMillis)); //rollover
+        Serial.println(" ROLLOVER ");
+    }
     else
-      elapsedMillis = m - lastMillis + MILLIS_MAX; //rollover
+    	elapsedMillis = m - lastMillis;
     lastMillis = m;
     strengthChargeTimeoutMillis -= elapsedMillis;
-    if (strengthChargeTimeoutMillis < 0) {
+//    Serial.print("  elapsedMillis: ");Serial.print(elapsedMillis);
+
+
+    if (strengthChargeTimeoutMillis < 50) {
       strengthChargeTimeoutMillis = 0;
       digitalWrite(oSuccess, HIGH); //allow for the sled to move
+      master.successOverFlag_UI = false;
+      Serial.println("_____________SUCCESS ON_____________");
+
+      Serial.print(" AS over  flag: "); Serial.print(master.successOverFlag_AS);
+      Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
+      Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
+      Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
+      Serial.print(" restartStrengthFlag: "); Serial.println(ui.restartStrengthFlag);
+
+      Serial.print(" AS: "); Serial.print(accustat.returnState());
+      Serial.print(" PB: "); Serial.print(pushback.getState());
+      Serial.print(" SS: "); Serial.print(sleep.getState());
+      Serial.print(" UIS: "); Serial.println(ui.getState());
       successStartTime = millis();
-      ui.goStrengthPosthit(UISPH_SUCCESS, 0);//changes the screen to display success
+
+      ui.goStrengthPosthit(UISPH_SUCCESS, 0);  //changes the screen to display success
       accustat.saveHiddenPeak();
     }
   } // end if (strengthChargeTimeoutMillis > 0)
@@ -125,7 +151,7 @@ void MasterSystem::heartbeat() {
       // exit Towing mode
       lastTowSwitch = MAS_LTS_OFF;
       ui.enterState(lastReadyState); //display last state
-      Serial.println("exit tow switch call ui.enterState");
+//      Serial.println("exit tow switch call ui.enterState");
       digitalWrite(oDisplayPowerPin, HIGH);
     }
   } // end else
@@ -168,8 +194,13 @@ void MasterSystem::heartbeat() {
       break;
 
     case UIS_SCRUM_STRENGTH_POSTHIT:
-      if (strengthPosthitTimeoutHeartbeats-- <= 1)
-        ui.enterState(UIS_SCRUM_STRENGTH);
+      if (successOverFlag_UI) {
+    	  //pushback.enterState(PBS_READY1_SINKING);
+    	  //Serial.println(" calling PBS_READY1_SINKING early");
+    	  ui.restartStrengthFlag = true;
+    	  //ui.enterState(UIS_SCRUM_STRENGTH);
+    	  successOverFlag_UI = false;
+      }
       break;
 
       // (other states do nothing)nnn
@@ -246,7 +277,9 @@ void MasterSystem::UIModeChanged(byte uis) {
 
     case UIS_SCRUM_STRENGTH_CHARGE:
       lastMillis = millis();
-      strengthChargeTimeoutMillis = ui.getVar(UIVM_STRENGTH_DURATION) * 10000L;
+//      Serial.println("Master in STrengh Charge");
+      strengthChargeTimeoutMillis = ui.getVar(UIVM_STRENGTH_DURATION) * 1000L;
+      Serial.println(" strengthChargeTimeoutMillis was set");
       break;
 
     case UIS_SCRUM_STRENGTH_POSTHIT:

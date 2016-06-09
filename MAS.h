@@ -64,7 +64,7 @@ class MasterSystem {
     int getOutriggerTightAve(void);
 //    int getPushbackSonarAve(void);
 
-    volatile long successStartTime;
+    volatile unsigned long successStartTime;
 
     volatile int outriggerLooseIndex;
     volatile int outriggerTightIndex;
@@ -77,8 +77,10 @@ class MasterSystem {
     volatile int pushbackSonar [AVE_ARRAY_SIZE];
     volatile int pushbackSonarAve;
     volatile int pushbackIndex;
-
-
+    volatile unsigned long strengthChargeTimeoutMillis;
+    volatile bool noInterrupts;
+    volatile bool successOverFlag_AS;
+    volatile bool successOverFlag_UI;
 
   private:
     byte lastUIState;
@@ -86,8 +88,7 @@ class MasterSystem {
     byte lastTowSwitch;
 
     // used during loop() in STRENGTH CHARGE phase
-    long lastMillis;
-    long strengthChargeTimeoutMillis;
+    volatile unsigned long lastMillis;
     byte strengthPosthitTimeoutHeartbeats;
 
 };

@@ -5,7 +5,7 @@
  *      Author: Prospect
  */
 #include "HAL.h"
-
+#include "AS.h"
 #include "pinDefs.h"
 
 // Sonar accuracy might be improved by using Input Capture hardware,
@@ -201,6 +201,7 @@ void halSetPushbackUpDown(int dir) {
 */
 void halSetPushbackDumpValve(byte level) {
   digitalWrite(oPushbackDumpValve, level);
+  accustat.dumpValveFlag = true;
   if (level == HIGH) {
 	  Serial.println("  AIR DUMPED ");
   }

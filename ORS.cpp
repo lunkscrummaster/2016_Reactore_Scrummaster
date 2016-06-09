@@ -27,7 +27,7 @@ void OutriggerSystem::loop() {
     outriggersFirstPumpDone = true;
   } // end if(outriggersFirstPumpDone == false)
 
-  //Serial.print("The balance mode is : "); Serial.println(outriggers.inBalanceMode);
+ // Serial.print("The balance mode is : "); Serial.println(outriggers.inBalanceMode);
 
   if (inBalanceMode && pushback.getState() == PBS_QUIET) {
     volatile int ld = master.getOutriggerLooseAve(); //was 2
@@ -48,7 +48,6 @@ void OutriggerSystem::loop() {
     	  delay(100);
     	  accustat.setNaturalPreCharge();
     	  setBalanceMode(false);
-
       }//ends last else
 /*
       if (digitalRead(oOutriggerLooseUp)) {

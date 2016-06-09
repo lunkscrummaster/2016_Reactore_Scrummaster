@@ -27,7 +27,7 @@
 #define AS_HITTING    			2 			// currently being hit??
 #define AS_POSTHIT    			3 			// hit finished, and do something....?
 
-#define HIT_TRIP     			6      		// hit detected if sudden rise by this amount (raw pressure)
+#define HIT_TRIP     			10      		// hit detected if sudden rise by this amount (raw pressure)
 #define COOLDOWN_PERIODS  		8  			// minimum hitting phase is this number of heartbeats long
 
 //#define BEEP_COUNT_NEW_PEAK  	1 			// new peak for this cycle
@@ -85,11 +85,13 @@ class Accustat {
     int  precharge;
     int  lastReading;
     bool beeperFlag;
+    bool dumpValveFlag;
+    void enterState(byte newState);
 
   private:
     int naturalPreCharge;
     byte state; // one of AS_
-    void enterState(byte newState);
+
 
     byte mode;  // one of ASM_*
 

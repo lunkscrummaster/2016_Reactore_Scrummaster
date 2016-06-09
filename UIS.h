@@ -74,6 +74,7 @@ class UISystem {
     int lb;
     int tb;
     bool pbTooFar;
+    bool restartStrengthFlag;
 
     int accustatDiff;
 

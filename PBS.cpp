@@ -19,9 +19,9 @@ PushbackSystem::PushbackSystem() {
     This is called from the heartbeat function in the main program page
 */
 void PushbackSystem::heartbeat() {
-	noInterrupts();
+	master.noInterrupts = true;
 	volatile int son = master.pushbackSonarAve;//find value of pushback sonar
-	interrupts();
+	master.noInterrupts = false;
 
   switch (state) {
     case PBS_READY1_SINKING:
@@ -86,7 +86,7 @@ void PushbackSystem::enable(boolean en) {
 */
 void PushbackSystem::enterState(byte newState) {
   state = newState;
-//    Serial.print ("pushback system new state: "); Serial.println(state);
+    Serial.print ("pbs new st: "); Serial.println(state);
   switch (state) {
     case PBS_QUIET:
       halSetPushbackUpDown(0);
@@ -95,6 +95,7 @@ void PushbackSystem::enterState(byte newState) {
 
     case PBS_READY1_SINKING:
       digitalWrite(oAirSpringLockout, LOW); // when low, suspension is availble to go down
+      Serial.println(" PBS_READY1_SINKING cause AS_Quiet ");
       accustat.pause();
       halSetPushbackUpDown(-1);
       break;
@@ -103,13 +104,14 @@ void PushbackSystem::enterState(byte newState) {
 //      Serial.println("PBS_READY2_RAISE called setBalanceMode");
       halSetPushbackUpDown(1);
 //      Serial.println("PBS_Raising_Set_BalanceMode_True");
-      outriggers.setBalanceMode(true); //beging to balance the machine
+       //beging to balance the machine
       break;
 
     case PBS_READY3_SETTLING:
       halSetPushbackUpDown(0);
       //outriggers.setBalanceMode(false);
       settlingTimeout = SETTLING_COUNT;
+      outriggers.setBalanceMode(true);
       break;
   } // end switch (state)
 }//end enterState
@@ -126,6 +128,7 @@ void PushbackSystem::goReady(byte asMode, int sinkTo, int raiseTo) {
   accustat.setMode(asMode);
 //  Serial.println(" goReady changed PBS STATE");
   enterState(PBS_READY1_SINKING);// this is above^^
+  Serial.println(" enter to early PBS_READY1_SINKING");
 }//end goReady
 
 /* --------------------------------------PushbackSystem::getState()--------------------------------------

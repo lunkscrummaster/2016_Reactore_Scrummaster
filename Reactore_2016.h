@@ -30,8 +30,15 @@
 #define CHARGE_ALTERNATE_MINUTES   	60 // **** changed from 60, doesn't matter if it is awake or sleep// battery charge circuit alternates every 'CHARGE_ALTERNATE_MINUTES'
 #define MILLIS_MAX 					4294967295
 #define MICROS_MAX 					4294967295
-#define TRAVEL_TIME   				1000
 #define sonarTimer        			Timer1
+
+/* Hi Kevin. Hope you are doing well. If you want to change the TRAVEL_TIME, which is the length of time
+    the sled will be pushed after there was a successful push.
+    1000 = 1 second
+    2000 = 2 seconds etc...
+*/
+#define TRAVEL_TIME   				10000
+
 
 
 

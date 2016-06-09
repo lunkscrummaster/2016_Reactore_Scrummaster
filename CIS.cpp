@@ -27,16 +27,18 @@ CompressorSystem::CompressorSystem() {
  *  4. Once tank is filled to correct pressure, enter stopping state
  *  5. Waits for on loop through, then enters the off state
 */
-void CompressorSystem::heartbeat(void)
-{
+void CompressorSystem::heartbeat(void){
   //Serial.print("Compressor System Heartbeat Started, State: "); Serial.println(comp.state);
 
   int reservoirPressure = analogRead(aiReservoirPin);
+  if(reservoirPressure < pvTankPressMin-100)
+	  reservoirPressure = pvTankPressMin;
 
   switch(state){
     case CSS_OFF:
       if (reservoirPressure < pvTankPressMin) { //if the compressor is off, and the tank is to low, turn it on
         inverter.neededByCompressor(true);
+        Serial.print(" reservoirPressure: "); Serial.println(reservoirPressure);
         digitalWrite(oUnloaderPin, HIGH); //dump pressure for 2 heart beats before compressor is truned on
         pvUnloaderTimeout = 2;    // number of heartbeat intervals to wait for unloader
         enterState(CSS_STARTING); //compressor system is now starting
@@ -85,7 +87,7 @@ void CompressorSystem::heartbeat(void)
 */
 void CompressorSystem::enterState(byte newState) {
   state = newState;
-  //Serial.print("Compressor System enterState: "); Serial.println(newState);
+  Serial.print("Compressor System enterState: "); Serial.println(newState);
 } // end CompressorSystem::enterState
 
 
@@ -149,8 +151,10 @@ void InverterSystem::heartbeat() {
 */
 void InverterSystem::neededByCompressor(boolean en) {
   nbCompressor = en;
+  Serial.println(" neededByCompressor called sleep.wakeup() ");
 //  Serial.println("  InverterSystem::neededByCompressor is wakeing up system  ");
-  sleep.wakeup(); //wake up system ****
+  if(sleep.getState() == SSS_ASLEEP)
+	  sleep.wakeup(); //wake up system ****
   /* **** Changes made May 20, 2016 By t,z,k
    *  Whenever the compressor is needed while asleep, the system will wake up
    *  This will allow for the batteries to be linked

@@ -1,12 +1,5 @@
 #include "Reactore_2016.h"
 
-
-/* Hi Kevin. Hope you are doing well. If you want to change the TRAVEL_TIME, which is the length of time
-    the sled will be pushed after there was a successful push.
-    1000 = 1 second
-    2000 = 2 seconds etc...
-*/
-
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 
@@ -112,19 +105,39 @@ void loop() {
 
   accustat.loop();    // to average pushback-arm pressure readings
 
-  outriggers.loop();  // fast update of outrigger balancing system
+ if(outriggers.getBalanceMode() == true)
+	 outriggers.loop();  // fast update of outrigger balancing system
 
   /* Code added May 21 by Trevor and Zach
       The code below is used for the successtimer which is what is used to determine how long the
       sled can be pushed after a success. Code handles rollovers after approx 50days
   */
   if (master.successStartTime > 0) {
-    long currentMillis = millis() - master.successStartTime;
-    if (currentMillis < 0)
-      currentMillis += MILLIS_MAX; // rollover
+	unsigned long currentTime = millis();
+	unsigned long currentMillis = 0;
+	if(currentTime > master.successStartTime)
+		currentMillis = currentTime - master.successStartTime;
+	else
+		currentMillis = currentTime - master.successStartTime + MILLIS_MAX; // rollover
+    //Serial.print(" currentMillis; "); Serial.println(currentMillis);
     if (currentMillis > TRAVEL_TIME) {
       digitalWrite(oSuccess, LOW);
       master.successStartTime = 0;
+      master.successOverFlag_AS = true;
+      master.successOverFlag_UI = true;
+
+      Serial.println("____________________SUCCESS_OVER______");
+
+      Serial.print(" AS over  flag: "); Serial.print(master.successOverFlag_AS);
+      Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
+      Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
+      Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
+      Serial.print(" restartStrengthFlag: "); Serial.println(ui.restartStrengthFlag);
+
+      Serial.print(" AS: "); Serial.print(accustat.returnState());
+      Serial.print(" PB: "); Serial.print(pushback.getState());
+      Serial.print(" SS: "); Serial.print(sleep.getState());
+      Serial.print(" UIS: "); Serial.println(ui.getState());
     }
 
   }
@@ -151,56 +164,60 @@ void loop() {
 */
 void sonarISR() {                 //****added to constanty read pushback sonar. can add master shutdown control here later.
 
-	int oldReading = master.pushbackSonar[master.pushbackIndex];
-	int temp =  analogRead(aiPushbackSonar);
-//	master.pushbackSonar[master.pushbackIndex] = analogRead(aiPushbackSonar);
-//	while(master.pushbackSonar[master.pushbackIndex] > 400 || master.pushbackSonar[master.pushbackIndex] < 290){
-//		master.pushbackSonar[master.pushbackIndex] = analogRead(aiPushbackSonar);
-//	}
-	if(temp > 80 || temp < 58){
-		if(master.pushbackIndex == 0){
-			master.pushbackSonar[master.pushbackIndex] = master.pushbackSonar[AVE_ARRAY_SIZE-1];
-		}else{
-			master.pushbackSonar[master.pushbackIndex] = master.pushbackSonar[master.pushbackIndex-1];
-		}
-	}else{
-		master.pushbackSonar[master.pushbackIndex] =  temp;
-	}
-	master.pushbackSonarAve += master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE-oldReading/AVE_ARRAY_SIZE;
+	if(!master.noInterrupts){
+		master.pushbackSonarAve -= master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE;
+		int temp =  analogRead(aiPushbackSonar);
 
-	/*    CODE PLANNING TO CHECK FOR BALL IN, AND EMERGENCY SHUTDOWN
-	 *   if (accustat.returnmode() == AS_HITTING)  // if we are hitting and need
-	 *   {
-	 *   //check for ball
-	 *   }
-		if (moving to fast)
-		shutdown
-	*/
-	if(accustat.returnmode() == ASM_STRENGTH && accustat.returnState() == AS_HITTING && ui.getState() == UIS_SCRUM_STRENGTH_CHARGE){
-		if(master.pushbackSonar[master.pushbackIndex] > 75) {
-			pushback.enterState(PBS_READY1_SINKING);
-			ui.goStrengthPosthit(UISPH_TOO_HIGH, 0);
-			ui.pbTooFar = true;
+		if(temp > 80 || temp < 58){
+			if(master.pushbackIndex == 0){
+				master.pushbackSonar[master.pushbackIndex] = master.pushbackSonar[AVE_ARRAY_SIZE-1];
+			}else{
+				master.pushbackSonar[master.pushbackIndex] = master.pushbackSonar[master.pushbackIndex-1];
+			}
+		}else{
+			master.pushbackSonar[master.pushbackIndex] =  temp;
 		}
-	}
-	//TRUCK, NO POINT TO CHECK FOR BALLS WHEN INDIVIDUAL
-	/* original was if (accustat.returnState() == AS_HITTING)
-	 * no point checking for a ball if we are in indiviual mode
-	*/
-	if(accustat.lookForBall == true){
-		noInterrupts();
-		if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70){
-//			ui.lb = analogRead(aiLoose_ball_sonar);
-//			ui.tb = analogRead(aiTight_ball_sonar);
-			accustat.setHasSeenBall(true);
-			accustat.lookForBall = false;
-			accustat.printBall = true;
+		master.pushbackSonarAve += master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE;
+
+		/*    CODE PLANNING TO CHECK FOR BALL IN, AND EMERGENCY SHUTDOWN
+		 *   if (accustat.returnmode() == AS_HITTING)  // if we are hitting and need
+		 *   {
+		 *   //check for ball
+		 *   }
+			if (moving to fast)
+			shutdown
+		*/
+		if(ui.getState() == UIS_SCRUM_STRENGTH_CHARGE){
+			if(accustat.returnmode() == ASM_STRENGTH && accustat.returnState() == AS_HITTING){
+				if(master.pushbackSonar[master.pushbackIndex] > 78) {
+					pushback.enterState(PBS_READY1_SINKING);
+					ui.goStrengthPosthit(UISPH_TOO_HIGH, 0);
+					ui.pbTooFar = true;
+
+				}
+			}
 		}
-		interrupts();
+		//TRUCK, NO POINT TO CHECK FOR BALLS WHEN INDIVIDUAL
+		/* original was if (accustat.returnState() == AS_HITTING)
+		 * no point checking for a ball if we are in indiviual mode
+		*/
+		if(accustat.lookForBall == true){
+			if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70){
+	//			ui.lb = analogRead(aiLoose_ball_sonar);
+	//			ui.tb = analogRead(aiTight_ball_sonar);
+				accustat.setHasSeenBall(true);
+				accustat.lookForBall = false;
+				accustat.printBall = true;
+				if(accustat.returnmode() == ASM_STRENGTH){
+					master.UIModeChanged(UIS_SCRUM_STRENGTH_CHARGE);
+					ui.enterState(UIS_SCRUM_STRENGTH_CHARGE);
+				}
+			}
+		}
+		master.pushbackIndex++;
+		if(master.pushbackIndex == AVE_ARRAY_SIZE)
+			master.pushbackIndex = 0;
 	}
-	master.pushbackIndex++;
-	if(master.pushbackIndex == AVE_ARRAY_SIZE)
-		master.pushbackIndex = 0;
 } // end sonarISR()
 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------

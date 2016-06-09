@@ -5,6 +5,7 @@
  *      Author: Prospect
  */
 #include "UIS.h"
+#include "AS.h"
 
 //------------------------------------------MENU_BUTTON_CLASS------------------------------------------
 class MenuButton {
@@ -89,6 +90,7 @@ UISystem::UISystem(LiquidCrystal &lc) :
 	lcd.noDisplay();
 	pbTooFar = false;
 	accustatDiff = 0;
+	restartStrengthFlag = false;
 }
 
 /* ------------------------------------------UISystem::setNonModVarInfo------------------------------------------
@@ -130,32 +132,33 @@ void UISystem::loop() {
 //	noInterrupts();
 //	Serial.print("looseBall: "); Serial.print(lb);	Serial.print(" TightBall: "); Serial.println(tb);
 //	interrupts();
-	lcd.setCursor(0, 3);
-	lcd.print("                    ");
-	lcd.setCursor(0,3);
-	lcd.print(accustat.getNaturalPreCharge());
-	lcd.print(" ");
-	lcd.print(accustat.sessionPeak);
-	lcd.print(" ");
-	lcd.print(accustat.currentPeak);
-	lcd.print(" ");
-	lcd.print(accustat.hiddenPeak);
-	lcd.print(" ");
-	lcd.print(accustat.lastReading);
-	lcd.setCursor(0,2);
-	lcd.print("                    ");
-	lcd.setCursor(0,2);
-	lcd.print(analogRead(aiAchievedPin));
-	lcd.print(" ");
-	lcd.print(accustatDiff);
+//	lcd.setCursor(0, 3);
+//	lcd.print("                    ");
+//	lcd.setCursor(0,3);
+//	lcd.print(accustat.getNaturalPreCharge());
+//	lcd.print(" ");
+//	lcd.print(accustat.sessionPeak);
+//	lcd.print(" ");
+//	lcd.print(accustat.currentPeak);
+//	lcd.print(" ");
+//	lcd.print(accustat.hiddenPeak);
+//	lcd.print(" ");
+//	lcd.print(accustat.lastReading);
+//	lcd.setCursor(0,2);
+//	lcd.print("                    ");
+//	lcd.setCursor(0,2);
+//	lcd.print(analogRead(aiAchievedPin));
+//	lcd.print(" ");
+//	lcd.print(accustatDiff);
 //	lcd.print(" ");
 //	lcd.print(lb);
 //	lcd.print(" ");
 //	lcd.print(tb);
-if(pbTooFar == true){
-	pbTooFar = false;
-	Serial.println("EmergencyShutDown");
-}
+	if(pbTooFar == true){
+		pbTooFar = false;
+		Serial.println("EmergencyShutDown");
+	}
+
 
 	//lcd.setCursor(0,2);
 //	lcd.print("                ");
@@ -167,11 +170,18 @@ if(pbTooFar == true){
 //		lcd.print("  ");
 //		lcd.print(accustat.aveTimer);
 //	}
+//
+//	unsigned long m = micros();
+//	unsigned long elapsedMicros = 0;
+//	if(m > lastMicros)
+//		elapsedMicros = m - lastMicros;
+//	else
+//		elapsedMicros = m - lastMicros + MICROS_MAX;
 
 	long m = micros();
 	long elapsedMicros = m - lastMicros;
-	if (elapsedMicros < 0) //
-			{
+
+	if (elapsedMicros < 0){
 		elapsedMicros += MICROS_MAX;
 	} else {
 		lastMicros = m;
@@ -180,6 +190,8 @@ if(pbTooFar == true){
 	boolean modeWasPressed = bMode.update(elapsedMicros) > 0;
 	boolean setWasPressed = bSet.update(elapsedMicros) > 0;
 
+	if(restartStrengthFlag == true)
+		modeWasPressed = true;
 	// if Up/Down buttons pressed, update 'adjust' value
 	int adjust = 0;
 	if (bUp.update(elapsedMicros) > 0)
@@ -202,18 +214,19 @@ if(pbTooFar == true){
 				 This can be done by looking at the truck power connection as another way to wake it up.
 				 Original if (modeWasPressed || setWasPressed || adjust != 0){
 				 */
-				if (modeWasPressed || setWasPressed
-						|| adjust != 0|| digitalRead(iTrailerPowerPin) == LOW) {
-					// TRUCK original: digitalRead(iTrailerPowerPin) == LOW
-					sleep.wakeup();
-//    Serial.println(" button press check is calling wakeup ");
-//    Serial.print(" modeWasPressed: "); Serial.print(modeWasPressed);
-//    Serial.print(" setWasPressed: "); Serial.print(setWasPressed);
-//    Serial.print("  adjust: "); Serial.print(adjust);
-//    Serial.print("  iTrailerPowerPin: "); Serial.println(digitalRead(iTrailerPowerPin));
-					// ****  enterState(state); //reset the screen
-				} // end if button was pressed
-
+				if (sleep.getState() == SSS_ASLEEP) {
+					if (modeWasPressed || setWasPressed
+							|| adjust != 0 || digitalRead(iTrailerPowerPin) == LOW) {
+						// TRUCK original: digitalRead(iTrailerPowerPin) == LOW
+						sleep.wakeup();
+	//    Serial.println(" button press check is calling wakeup ");
+	//    Serial.print(" modeWasPressed: "); Serial.print(modeWasPressed);
+	//    Serial.print(" setWasPressed: "); Serial.print(setWasPressed);
+	//    Serial.print("  adjust: "); Serial.print(adjust);
+	//    Serial.print("  iTrailerPowerPin: "); Serial.println(digitalRead(iTrailerPowerPin));
+						// ****  enterState(state); //reset the screen
+					} // end if button was pressed
+				} // end if asleep
 	// ???? investigate the sonar pushback safety stystem of when it should shut off because
 	// it is going to fast TRUCK
 
@@ -257,9 +270,16 @@ if(pbTooFar == true){
 
 	default:  // a Strength mode
 		if (modeWasPressed) {
-			enterState(UIS_SCRUM_INDIVIDUAL);
-			Serial.println("default ui loop case called enterState");
-			accustat.reset();
+			if(restartStrengthFlag == true){
+				accustat.enterState(AS_POSTHIT);
+				enterState(UIS_SCRUM_STRENGTH);
+				pushback.enterState(PBS_READY1_SINKING);
+				restartStrengthFlag = false;
+			}else{
+				enterState(UIS_SCRUM_INDIVIDUAL);
+				Serial.println("default ui loop case called enterState");
+				accustat.reset();
+			}
 		} else if (state == UIS_SCRUM_STRENGTH && setWasPressed) {
 			switch (cur_var) {
 			case UIVM_STRENGTH_THRESHOLD:
@@ -402,7 +422,9 @@ byte UISystem::getState() {
  */
 void UISystem::enterState(byte newState) {
 	cur_var = BAD_VARNUM;
-	sleep.wakeup();
+	if(sleep.getState()==SSS_ASLEEP)
+		sleep.wakeup();
+	Serial.print(" UISystem new state: "); Serial.println(newState);
 	/* if sleep.wakeup(); was moved into each state, we could possibly add a uisleepstate
 	 This would allow for the screen to display that it is sleep, with the resevoir pressure
 	 and we could probably turn off the inverter
@@ -449,7 +471,7 @@ void UISystem::enterState(byte newState) {
 		// Below is when the machine is pushing back
 	case UIS_SCRUM_STRENGTH_CHARGE:
 		initcharge.enable(false);  // lock in Init Charge pressure
-		Serial.println("UI = Charge");
+		//Serial.println("UI = Charge");
 		halSetPushbackDumpValve(HIGH);
 		lcd.print(" STRENGTH TRAINING ");
 		lcd.setCursor(6, 2);
@@ -499,7 +521,7 @@ void UISystem::enterState(byte newState) {
    // Serial.print("UIenterState called UImode: "); Serial.print(state); Serial.println("  lastUI: ");Serial.println(master.getLastUIState());
     if (master.getLastUIState() != state) {
 		master.UIModeChanged(state);
-		Serial.println("ui.IF(last!=State)");
+		Serial.print(" enter UIModeChanged: "); Serial.println(state);
 	}
 } // end UISystem::enterState
 
