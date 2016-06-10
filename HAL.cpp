@@ -162,7 +162,12 @@ void halSetup() {
  * Why does this retrun < 500 ?????????************************
 */
 boolean halIsTowScrumSwitchInTowing() {
-  return analogRead(aiScrumPin) < 200;
+	int limit = 0;
+	if(sleep.getState() == SSS_AWAKE)
+		limit = 200;
+	else
+		limit = 600;
+  return analogRead(aiScrumPin) < limit;
 } // end halIsTowScrumSwitchInTowing
 
 
@@ -203,7 +208,7 @@ void halSetPushbackDumpValve(byte level) {
   digitalWrite(oPushbackDumpValve, level);
   accustat.dumpValveFlag = true;
   if (level == HIGH) {
-	  Serial.println("  AIR DUMPED ");
+//	  Serial.println("  AIR DUMPED ");
   }
 } // end halSetPushbackDumpValve
 

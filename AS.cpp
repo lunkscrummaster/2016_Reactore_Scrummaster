@@ -36,8 +36,8 @@ void beeperHeartbeat() {
 			if (beeperCountdown-- <= 1) {
 				// start or stop beeper
 				digitalWrite(oBeeper, (--beeperToDo & 1) ? HIGH : LOW); // write the beep on or off
-				Serial.print("beeperToDo :");
-				Serial.println((beeperToDo));
+//				Serial.print("beeperToDo :");
+//				Serial.println((beeperToDo));
 				beeperCountdown = BEEPER_PERIODS;
 			} // end if (beeperCountdown-- <= 1)
 		} else {
@@ -162,7 +162,7 @@ void Accustat::displayHeartbeat() {
 
 //--------------------------ACCUSTAT_Constructor -----------------------------------------------------
 Accustat::Accustat() :
-		pressureArray { 0, 10, 20, 29, 39, 49, 59, 69, 78, 88, 98, 108, 118,
+  pressureArray { 0,  10,  20,  29,  39,  49,  59,  69,  78,  88,  98, 108, 118,
 				127, 137, 147, 157, 160, 163, 166, 169, 172, 175, 178, 181, 184,
 				187, 190, 193, 196, 211, 226, 241, 256, 271, 286, 302, 317, 332,
 				347, 362, 377, 392, 409, 425, 442, 458, 474, 490, 507, 523, 539,
@@ -195,6 +195,7 @@ Accustat::Accustat() :
 	state = AS_QUIET;
 	precharge = 0;
 	naturalPreCharge = 0;
+	hitTrip = 4;
 	aveTimerStart = false;
 	aveTimer = 0;
 	earlyPush = false;
@@ -204,6 +205,7 @@ Accustat::Accustat() :
 	dumpValveFlag = false;
 	stDurFailFlag = false;
 	stNoBallFailFlag = false;
+	setPreChargeFlag = false;
 }
 /* --------------------------Accustat::loop()------------------------------------------------------------
  * #define AS_QUIET      0    #define AS_PREHIT     1   #define AS_HITTING    2 #define AS_POSTHIT    3
@@ -211,6 +213,10 @@ Accustat::Accustat() :
  * 1. Checks for pad hit to wake up machine
  */
 void Accustat::loop() {
+	if (mode == ASM_INDIVIDUAL)
+		hitTrip = 5;
+	else
+		hitTrip = 8;
 
 	/* Added code below by trevor and zach
 	 So if the machine is in sleep mode, the machine should wake up when someone hits the pads
@@ -220,32 +226,43 @@ void Accustat::loop() {
 	if (sleep.getState() == 0) {
 		if (analogRead(aiAchievedPin) > 275) {
 			sleep.wakeup();
-			Serial.print("  analogRead(aiAchievedPin) is wakeing it up");
-			Serial.println(analogRead(aiAchievedPin));
+//			Serial.print("  analogRead(aiAchievedPin) is wakeing it up");
+//			Serial.println(analogRead(aiAchievedPin));
 		}
 	} // end if (sleep.getState() == 0)
 
-	if (isEnabled() && state != AS_QUIET) {
+	if (isEnabled() && state != AS_QUIET && master.arrayFullFlag) {
 		// update running sum
-		int p = analogRead(aiAchievedPin); //read current value and assign to p
-		pbAvg.update(p); //update the average, using the last read value
-
-		int avg = pbAvg.getAverage(); //updated average
+//		int p = analogRead(aiAchievedPin); //read current value and assign to p
+//		pbAvg.update(p); //update the average, using the last read value
+		master.noInterrupts = true;
+		int avg = master.pushbackPresAve; //updated average
+		master.noInterrupts = false;
 //    Serial.print("p: "); Serial.print(p); Serial.print(" avg: "); Serial.println(avg);
 //    Serial.print(" diff: "); Serial.println(p-avg);
 		switch (state) {
 		case AS_PREHIT: {
+//			Serial.print(" live: "); Serial.print(analogRead(aiAchievedPin));
+//			Serial.print(" avg: "); Serial.print(avg);
+//			Serial.print(" naturalprecharge: "); Serial.println(naturalPreCharge);
+//			for(int i = 0; i < AVG_NUM_READINGS; i++){
+//				Serial.print(i); Serial.print(": "); Serial.print(master.pushbackPresArray[i]); Serial.print("  ");
+//			}
 //          int diff = p - avg; //difference between the current and average reading
 			int diff = avg - naturalPreCharge;
 			lastReading = avg;
 			//Serial.print(" avg: "); Serial.print(avg); Serial.print(" diff: "); Serial.println(diff);
 //			Serial.print(" NAT_PRE: "); Serial.print(naturalPreCharge);
 //			Serial.print(" diff: "); Serial.println(diff);
-			if (diff > HIT_TRIP && outriggers.getBalanceMode() == false) { //#define HIT_TRIP     6 ???? confirm this operation wrt #define (HIT_TRIP) based on reading during operation
-				Serial.print(" avg: ");
-				Serial.print(avg);
-				Serial.print(" naturalprecharge: ");
-				Serial.println(naturalPreCharge);
+			master.noInterrupts = true;
+			if (diff > hitTrip && outriggers.getBalanceMode() == false) {
+//				Serial.print(" avg: ");
+//				Serial.print(avg);
+//				Serial.print(" lastReading: ");
+//				Serial.print(lastReading);
+
+				Serial.println("");
+				master.noInterrupts = false;
 				ui.accustatDiff = diff;
 				enterState(AS_HITTING);	//enter AS_HITTING since the pads are being hit
 				//assign the last reading to the average
@@ -271,8 +288,8 @@ void Accustat::loop() {
 			case ASM_STRENGTH:
 				if (currentPeak < hiddenPeak) {
 					saveHiddenPeak();
-					Serial.print(" currentPeak: ");
-					Serial.println(currentPeak);
+//					Serial.print(" currentPeak: ");
+//					Serial.println(currentPeak);
 				}
 				lastReading = avg;
 //				if (hasSeenBall) {
@@ -322,7 +339,7 @@ void Accustat::enable(boolean en) {
 			// disabling
 			digitalWrite(oDisplayPowerPin, LOW); //turn off display
 			enterState(AS_QUIET); //enter quiet mode
-			Serial.println(" Accustat::enablen called AS_Quiet");
+//			Serial.println(" Accustat::enablen called AS_Quiet");
 		}
 	} else {
 		if (en) {
@@ -330,7 +347,7 @@ void Accustat::enable(boolean en) {
 			digitalWrite(oDisplayPowerPin, HIGH);
 			display_num(0);
 			enterState(AS_QUIET);
-			Serial.println(" Accustat::enablen AS_Quiet");
+//			Serial.println(" Accustat::enablen AS_Quiet");
 		}
 	} // end else
 } // end Accustat::enable(boolean)
@@ -343,7 +360,7 @@ void Accustat::enable(boolean en) {
 void Accustat::reset() {
 	sessionPeak = currentPeak = 0;
 	ui.accustatDiff = 0;
-	Serial.println("ACCUSTAT RESET THE SESSION PEAK AND CURRENT PEAK");
+//	Serial.println("ACCUSTAT RESET THE SESSION PEAK AND CURRENT PEAK");
 	digitalWrite(oBeeper, LOW);
 } // end Accustat::reset()
 
@@ -354,7 +371,7 @@ void Accustat::reset() {
  */
 void Accustat::pause() {
 	enterState(AS_QUIET);
-	Serial.println(" Accustat::pause AS_Quiet");
+//	Serial.println(" Accustat::pause AS_Quiet");
 
 } // end Accustat::pause()
 
@@ -403,7 +420,10 @@ void Accustat::enterState(byte newState) {
 	case AS_PREHIT:
 		// reset the running average
 //		pbAvg.reset();
-		setNaturalPreCharge();
+//		accustat.setNaturalPreCharge();
+//		Serial.print(" NATTYPRECHARGY: "); Serial.println(naturalPreCharge);
+
+
 		break;
 
 	case AS_HITTING:
@@ -427,11 +447,12 @@ void Accustat::enterState(byte newState) {
 		}
 		if (sessionPeak < currentPeak) {
 			sessionPeak = currentPeak; //reset new session peak
-			Serial.println(" sessionPeak set inside accustat.enterState");
+//			Serial.println(" sessionPeak set inside accustat.enterState");
 			if (beeperFlag == false) {
-				Serial.println("beepFLAG = true");
+//				Serial.println("beepFLAG = true");
 				beeperFlag = true;
 				beep(BEEP_NEW_SESS_PEAK);
+				Serial.println(" AS_POSTIHT beep");
 			} //#define BEEP_NEW_SESS_PEAK 2  // new peak since last powerup/reset
 		}
 		displayAlternateIndex = DISPLAYMODE_ALTERNATE; // this code indicates "alternate between current peak and session peak"
@@ -473,7 +494,7 @@ void Accustat::heartbeat() {
 		 We changed the equation to what we got from the data that was supplised by Kevin
 		 */
 		//changed this equation to fit experimentally acquired data
-		int x = lastReading - naturalPreCharge;
+		int x = master.pushbackPresAve - naturalPreCharge;
 		if (x < 0)
 			x = 0;
 //		Serial.print(" diff: ");
@@ -493,33 +514,36 @@ void Accustat::heartbeat() {
 		case ASM_INDIVIDUAL:
 			if (currentPeak < disp) {
 				currentPeak = disp;
+
 				//Serial.print("  current peak set to disp  ");
 				// beep for passing current peak?
 			} // end if (currentPeak < disp)
 
-			if (sessionPeak < currentPeak) { //TRUCK this needs nested in some cases, so no beep during push
-				sessionPeak = currentPeak;
-				//		Serial.print(" current accustat state: "); Serial.println(accustat.returnState());
-//				Serial.print("if (sessionPeak < currentPeak) line 469 called beep()");
-				if (beeperFlag == false) {
-					beeperFlag = true;
-					beep(BEEP_NEW_SESS_PEAK);
-				}
-			}
+//			if (sessionPeak < currentPeak) { //TRUCK this needs nested in some cases, so no beep during push
+////				sessionPeak = currentPeak;
+//				//		Serial.print(" current accustat state: "); Serial.println(accustat.returnState());
+////				Serial.print("if (sessionPeak < currentPeak) line 469 called beep()");
+//				if (beeperFlag == false) {
+//					beeperFlag = true;
+////					beep(BEEP_NEW_SESS_PEAK);
+//					Serial.println(" individual session peak");
+//				}
+//			}
 			break;
 			// below will call a penatly if the players are pushing to hard before the ball is in???
 		case ASM_POWER: {
 			if (disp > ENGAGED_MIN) {
 				int threshold = ui.getVar(UIVM_POWER_THRESHOLD) * 100;
-				//Serial.println(" hasSeenBall: "); //Serial.println(hasSeenBall);
+
 				if (disp <= threshold) {
 					if (earlyPush == true) {
 						digitalWrite(oBeeper,LOW);
+						Serial.println(" disp<thresh, turn off beep");
 						earlyPush = false;
 					}
 					if (hasSeenBall) {
 						if (printBall) {
-							Serial.println(" ball true");
+//							Serial.println(" ball true");
 							printBall = false;
 						}
 						if (hiddenPeak < disp) {
@@ -533,6 +557,7 @@ void Accustat::heartbeat() {
 				} else { //disp > thresh
 					if (lookForBall) {
 						digitalWrite(oBeeper, HIGH);
+						Serial.println("beeper turned on for the early push        ");
 						//Serial.print(" disp: "); Serial.println(disp);
 						earlyPush = true;
 					} else {
@@ -575,12 +600,17 @@ void Accustat::heartbeat() {
 				if (disp <= threshold) {
 					if (earlyPush == true) {
 						digitalWrite(oBeeper,LOW);
-						Serial.println(" _________________________disp<thresh, turn off beep");
+						master.noInterrupts = true;
+						Serial.println("  turn off ");
+						master.noInterrupts = false;
 						earlyPush = false;
+						Serial.print(" off disp: "); Serial.print(disp);
+						Serial.print("	off AVE: "); Serial.print(master.pushbackPresAve);
+						Serial.print("	 off NAT_PRE: "); Serial.println(naturalPreCharge);
 					}
 					if (hasSeenBall) {
 						if (printBall) {
-							Serial.println(" ball true");
+//							Serial.println(" ball true");
 							printBall = false;
 						}
 						if (hiddenPeak < disp) {
@@ -593,11 +623,15 @@ void Accustat::heartbeat() {
 					}
 				} else { //if disp > thresh
 					if (lookForBall) {
-						if(!earlyPush){
-							digitalWrite(oBeeper, HIGH);
-							Serial.println("_________________________Set earlyPush True ");
-							earlyPush = true;
-						}
+						digitalWrite(oBeeper, HIGH);
+						master.noInterrupts = true;
+//						Serial.print("__earlyPush ");
+//						Serial.print(" disp: "); Serial.print(disp);
+//						Serial.print("	 AVE: "); Serial.print(master.pushbackPresAve);
+//						Serial.print("	 NAT_PRE: "); Serial.println(naturalPreCharge);
+						master.noInterrupts = false;
+						earlyPush = true;
+
 					} else {
 						if (hiddenPeak < disp) {
 							hiddenPeak = disp; //TADD
@@ -614,12 +648,15 @@ void Accustat::heartbeat() {
 			break;
 		} // end switch (mode)
 
-		int p = analogRead(aiAchievedPin); //read current value and assign to p
-		pbAvg.update(p); //update the average, using the last read value
+//		int p = analogRead(aiAchievedPin); //read current value and assign to p
+//		pbAvg.update(p); //update the average, using the last read value
 
 		if (returnmode() == ASM_INDIVIDUAL) {
 			//Serial.print("  average: "); Serial.print(pbAvg.getAverage()); Serial.print(" precharge "); Serial.print(naturalPreCharge);
-			if (currentPeak > 0 && pbAvg.getAverage() - naturalPreCharge < 6) {
+			master.noInterrupts = true;
+			int tempavg = master.pushbackPresAve;
+			master.noInterrupts = false;
+			if (currentPeak > 0 && tempavg - naturalPreCharge < 6) {
 				enterState(AS_POSTHIT);
 			}
 		} else {
@@ -634,13 +671,12 @@ void Accustat::heartbeat() {
 			case ASM_POWER:
 				if (currentPeak < hiddenPeak) {
 					saveHiddenPeak();
-					Serial.print(" currentPeak: ");
-					Serial.print(currentPeak);
-					Serial.print("  lastReading: ");
-					Serial.println(lastReading);
+//					Serial.print(" currentPeak: ");
+//					Serial.print(currentPeak);
+//					Serial.print("  lastReading: ");
+//					Serial.println(lastReading);
 					display_num(currentPeak);
 				}
-
 //					int presArrIndex = analogRead(aiAchievedPin)
 //							- naturalPreCharge;
 //					if (presArrIndex < 0)
@@ -649,9 +685,10 @@ void Accustat::heartbeat() {
 //					if (change < 0.6  && hasSeenBall == true && currentPeak > 0) {
 				if (returnState() == AS_HITTING) {
 					if (hasSeenBall) {
-						if (currentPeak > 0
-								&& (pbAvg.getAverage() - naturalPreCharge) < 6
-								&& disp < currentPeak) {
+						master.noInterrupts = true;
+						int tempavg2 = master.pushbackPresAve;
+						master.noInterrupts = false;
+						if (currentPeak > 0 && (tempavg2 - naturalPreCharge) < 6 && disp < currentPeak) {
 							//
 //					int avePB = pbAvg.getAverage();
 //					if(avePB < naturalPreCharge && hasSeenBall){
@@ -673,17 +710,27 @@ void Accustat::heartbeat() {
 							setHasSeenBall(false);
 							//						setNaturalPreCharge();
 						}
-					} // end if(hasSeenBall)
+					} else { // end if(hasSeenBall)
+						//if pressure drops below currentpeak/2, then they came off before the ball was in, reset the machine
+						if(disp <= currentPeak / 2) {
+							hiddenPeak = 0;
+							lookForBall = false;
+							stNoBallFailFlag = true;
+
+							enterState(AS_PREHIT);
+						}
+
+					} // end else no ball, off early
 				} // end AS_HITTING
 				break;
 
 			case ASM_STRENGTH:
 				if (currentPeak < hiddenPeak) {
 					saveHiddenPeak();
-					Serial.print(" currentPeak: ");
-					Serial.print(currentPeak);
-					Serial.print("  lastReading: ");
-					Serial.println(lastReading);
+//					Serial.print(" currentPeak: ");
+//					Serial.print(currentPeak);
+//					Serial.print("  lastReading: ");
+//					Serial.println(lastReading);
 					display_num(currentPeak);
 				}
 
@@ -730,7 +777,7 @@ void Accustat::heartbeat() {
 								//Serial.println("                     RESET BECAUSE OF PRESSURE DROP ");
 
 								enterState(AS_POSTHIT);
-								Serial.println("                     RESET BECAUSE OF PRESSURE DROP ");
+//								Serial.println("                     RESET BECAUSE OF PRESSURE DROP ");
 
 								delay(5000); //DELAY ask Kevin how long the error message should be on the screen for???
 								ui.enterState(UIS_SCRUM_STRENGTH);
@@ -812,13 +859,13 @@ void Accustat::setHasSeenBall(boolean ball) {
  *
  */
 void Accustat::setNaturalPreCharge(void) {
-	//pbAvg.reset();
-//	for (int i = 0; i < AVG_NUM_READINGS; i++) {
-//		pbAvg.update(analogRead(aiAchievedPin));
-//	}
-	naturalPreCharge = pbAvg.getAverage();
-	Serial.print("NAT_PRE");
-	Serial.println(naturalPreCharge);
+
+	master.noInterrupts = true;
+	naturalPreCharge = master.pushbackPresAve;
+	Serial.print(" natural precharge: "); Serial.println(naturalPreCharge);
+	master.noInterrupts = false;
+//	Serial.print("NAT_PRE");
+//	Serial.println(naturalPreCharge);
 }
 
 /* ---------------------------------------Accustat::getNaturalPreCharge()---------------------------------------

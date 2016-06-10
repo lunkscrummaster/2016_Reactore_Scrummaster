@@ -75,7 +75,7 @@
  *  4. The trailer charges the batteries
  *
 */
-#define iTrailerPowerPin                   12        // ------------ pulled LOW when towing power on
+#define iTrailerPowerPin                   29        // ------------ pulled LOW when towing power on
 
 ////////////////////////////// SONAR I PINS
 

@@ -12,10 +12,10 @@
 #include "Debug.h"
 #include "TimerOne.h"
 #include "Timer.h"
+#include "MAS.h"
 
 
 //-----------------------------------#DEFINES--------------------------------------
-#define AVG_NUM_READINGS  5
 
 
 //-----------------------------------AVERAGE_CLASS--------------------------------------
@@ -27,15 +27,15 @@ class Averager {
 
     void reset(void);
 
-    int getAverage(void);
+     int getAverage(void);
 
 
 
   private:
-    byte  readingCount;
-    byte  readingIndex;
-    int   readings[AVG_NUM_READINGS];
-    long  sum;
+//    volatile byte  readingCount;
+//    volatile byte  readingIndex;
+//    volatile int   readings[AVG_NUM_READINGS];
+//    volatile long  ave;
 };
 
 #endif

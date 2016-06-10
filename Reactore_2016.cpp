@@ -8,7 +8,7 @@ LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 
 void debugSetup() {
   Serial.begin(9600);
-  Serial.println("==================================================");
+//  Serial.println("==================================================");
 }
 
 void debugPrintS(const char* s)  {
@@ -76,6 +76,7 @@ void setup() {
   halSetup(); //sets up the input and output pins used the board
 
   Serial.begin(9600); //sets up serial communication
+  Serial.flush();
 
   lcd.begin(20, 4); //sets up screen
 
@@ -126,18 +127,18 @@ void loop() {
       master.successOverFlag_AS = true;
       master.successOverFlag_UI = true;
 
-      Serial.println("____________________SUCCESS_OVER______");
+//      Serial.println("____________________SUCCESS_OVER______");
 
-      Serial.print(" AS over  flag: "); Serial.print(master.successOverFlag_AS);
-      Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
-      Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
-      Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
-
-
-      Serial.print(" AS: "); Serial.print(accustat.returnState());
-      Serial.print(" PB: "); Serial.print(pushback.getState());
-      Serial.print(" SS: "); Serial.print(sleep.getState());
-      Serial.print(" UIS: "); Serial.println(ui.getState());
+//      Serial.print(" AS over  flag: "); Serial.print(master.successOverFlag_AS);
+//      Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
+//      Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
+//      Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
+//
+//
+//      Serial.print(" AS: "); Serial.print(accustat.returnState());
+//      Serial.print(" PB: "); Serial.print(pushback.getState());
+//      Serial.print(" SS: "); Serial.print(sleep.getState());
+//      Serial.print(" UIS: "); Serial.println(ui.getState());
     }
 
   }
@@ -165,8 +166,7 @@ void loop() {
 void sonarISR() {                 //****added to constanty read pushback sonar. can add master shutdown control here later.
 
 	if(!master.noInterrupts){
-
-		accustat.pbAvg.update(analogRead(aiAchievedPin));
+		//int p = analogRead(aiAchievedPin);
 
 		master.pushbackSonarAve -= master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE;
 		int temp =  analogRead(aiPushbackSonar);
@@ -196,7 +196,7 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 //					ui.pbTooFar = true;
 					master.strengthChargeTimeoutMillis = 0;
 					accustat.setHasSeenBall(false);
-					Serial.println("             EMERGENCY SHUTDOWN        ");
+//					Serial.println("             EMERGENCY SHUTDOWN        ");
 					ui.goStrengthPosthit(UISPH_TOO_HIGH, 0);
 					delay(5000);
 					accustat.enterState(AS_POSTHIT);
@@ -222,9 +222,9 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 				}
 			}
 		}
-		master.pushbackIndex++;
-		if(master.pushbackIndex == AVE_ARRAY_SIZE)
+		if(++master.pushbackIndex == AVE_ARRAY_SIZE)
 			master.pushbackIndex = 0;
+
 	}
 } // end sonarISR()
 
@@ -235,6 +235,10 @@ void initPushbackAve(){
 	    master.pushbackSonarAve += master.pushbackSonar[i]/AVE_ARRAY_SIZE;
 	    master.outriggerTightSonar[i] = analogRead(aiOutriggerTightSonar);
 	    master.outriggerLooseSonar[i] = analogRead(aiOutriggerLooseSonar);
+		if(i < AVG_NUM_READINGS){
+			master.pushbackPresArray[i] = analogRead(aiAchievedPin);
+			master.pushbackPresAve += master.pushbackPresArray[i]/AVG_NUM_READINGS;
+		}
 	  }
 }
 

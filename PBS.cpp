@@ -86,7 +86,7 @@ void PushbackSystem::enable(boolean en) {
 */
 void PushbackSystem::enterState(byte newState) {
   state = newState;
-    Serial.print ("pbs new st: "); Serial.println(state);
+//    Serial.print ("pbs new st: "); Serial.println(state);
   switch (state) {
     case PBS_QUIET:
       halSetPushbackUpDown(0);
@@ -94,8 +94,9 @@ void PushbackSystem::enterState(byte newState) {
       break;
 
     case PBS_READY1_SINKING:
+    	master.balancingDone = false;
       digitalWrite(oAirSpringLockout, LOW); // when low, suspension is availble to go down
-      Serial.println(" PBS_READY1_SINKING cause AS_Quiet ");
+//      Serial.println(" PBS_READY1_SINKING cause AS_Quiet ");
       accustat.pause();
       halSetPushbackUpDown(-1);
       break;
@@ -128,7 +129,7 @@ void PushbackSystem::goReady(byte asMode, int sinkTo, int raiseTo) {
   accustat.setMode(asMode);
 //  Serial.println(" goReady changed PBS STATE");
   enterState(PBS_READY1_SINKING);// this is above^^
-  Serial.println(" enter to early PBS_READY1_SINKING");
+//  Serial.println(" enter to early PBS_READY1_SINKING");
 }//end goReady
 
 /* --------------------------------------PushbackSystem::getState()--------------------------------------

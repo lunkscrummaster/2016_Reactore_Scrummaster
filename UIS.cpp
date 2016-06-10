@@ -243,7 +243,7 @@ void UISystem::loop() {
 		if (modeWasPressed) {
 			accustat.reset();
 			enterState(UIS_SCRUM_STRENGTH);
-			Serial.println("UIS_SCRUM_POWER called ui.enterState");
+//			Serial.println("UIS_SCRUM_POWER called ui.enterState");
 		} else if (setWasPressed) {
 			switch (cur_var) {
 			case UIVM_POWER_THRESHOLD:
@@ -259,7 +259,7 @@ void UISystem::loop() {
 	case UIS_SCRUM_INDIVIDUAL:
 		if (modeWasPressed) {
 			enterState(UIS_SCRUM_POWER);
-			Serial.println("UIS_SCRUM_IND called ui.enterState");
+//			Serial.println("UIS_SCRUM_IND called ui.enterState");
 
 			accustat.reset();
 		} // Set, Adjust ignored
@@ -274,7 +274,7 @@ void UISystem::loop() {
 //				restartStrengthFlag = false;
 //			}else{
 				enterState(UIS_SCRUM_INDIVIDUAL);
-				Serial.println("default ui loop case called enterState");
+//				Serial.println("default ui loop case called enterState");
 				accustat.reset();
 
 		} else if (state == UIS_SCRUM_STRENGTH && setWasPressed) {
@@ -421,7 +421,7 @@ void UISystem::enterState(byte newState) {
 	cur_var = BAD_VARNUM;
 	if(sleep.getState()==SSS_ASLEEP)
 		sleep.wakeup();
-	Serial.print(" UISystem new state: "); Serial.println(newState);
+//	Serial.print(" UISystem new state: "); Serial.println(newState);
 	/* if sleep.wakeup(); was moved into each state, we could possibly add a uisleepstate
 	 This would allow for the screen to display that it is sleep, with the resevoir pressure
 	 and we could probably turn off the inverter
@@ -518,7 +518,7 @@ void UISystem::enterState(byte newState) {
    // Serial.print("UIenterState called UImode: "); Serial.print(state); Serial.println("  lastUI: ");Serial.println(master.getLastUIState());
     if (master.getLastUIState() != state) {
 		master.UIModeChanged(state);
-		Serial.print(" enter UIModeChanged: "); Serial.println(state);
+//		Serial.print(" enter UIModeChanged: "); Serial.println(state);
 	}
 } // end UISystem::enterState
 

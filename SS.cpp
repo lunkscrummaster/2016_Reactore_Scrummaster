@@ -70,7 +70,7 @@ void SleepSystem::wakeup() {
 */
 void SleepSystem::enterState(byte newState) {
 
-		Serial.print(" SleepSystem new state: "); Serial.println(newState);
+//		Serial.print(" SleepSystem new state: "); Serial.println(newState);
   switch (state = newState) {
     case SSS_ASLEEP:
       digitalWrite(oDisplayPowerPin, LOW);

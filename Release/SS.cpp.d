@@ -13,8 +13,8 @@ SS.cpp.o: ../SS.cpp ../SS.h \
  ../Debug.h ../CIS.h ../HAL.h ../UIS.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/libraries/LiquidCrystal/1.0.4/src/LiquidCrystal.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Print.h \
- ../AVG.h ../TimerOne.h ../Timer.h ../Event.h ../AS.h ../MAS.h ../ORS.h \
- ../PBS.h ../pinDefs.h ../ICS.h
+ ../AVG.h ../TimerOne.h ../Timer.h ../Event.h ../MAS.h ../ORS.h ../PBS.h \
+ ../AS.h ../pinDefs.h ../ICS.h
 
 ../SS.h:
 
@@ -60,13 +60,13 @@ SS.cpp.o: ../SS.cpp ../SS.h \
 
 ../Event.h:
 
-../AS.h:
-
 ../MAS.h:
 
 ../ORS.h:
 
 ../PBS.h:
+
+../AS.h:
 
 ../pinDefs.h:
 

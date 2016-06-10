@@ -112,7 +112,7 @@ void InitialChargeSystem::setTargetPercent(int per) {
  *  1.depending on the passed state, calls halSetInitialChargeSystem with -1,0,1 to move machine up/down or nothing
 */
 void InitialChargeSystem::enterState(byte newState) {
-  Serial.print("Init Charge System new state:  "); Serial.println(newState);
+//  Serial.print("Init Charge System new state:  "); Serial.println(newState);
   switch (state = newState) {
     case ICS_QUIET:
       halSetInitialChargeUpDown(0);

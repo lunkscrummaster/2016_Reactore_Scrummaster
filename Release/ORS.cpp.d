@@ -11,10 +11,10 @@ ORS.cpp.o: ../ORS.cpp ../ORS.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Arduino.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/variants/mega/pins_arduino.h \
  ../Debug.h ../Timer.h ../Event.h ../HAL.h ../PBS.h ../AS.h ../AVG.h \
- ../TimerOne.h ../SS.h ../CIS.h ../UIS.h \
+ ../TimerOne.h ../MAS.h ../SS.h ../CIS.h ../UIS.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/libraries/LiquidCrystal/1.0.4/src/LiquidCrystal.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Print.h \
- ../ICS.h ../pinDefs.h ../MAS.h
+ ../ICS.h ../pinDefs.h
 
 ../ORS.h:
 
@@ -56,6 +56,8 @@ ORS.cpp.o: ../ORS.cpp ../ORS.h \
 
 ../TimerOne.h:
 
+../MAS.h:
+
 ../SS.h:
 
 ../CIS.h:
@@ -69,5 +71,3 @@ ORS.cpp.o: ../ORS.cpp ../ORS.h \
 ../ICS.h:
 
 ../pinDefs.h:
-
-../MAS.h:

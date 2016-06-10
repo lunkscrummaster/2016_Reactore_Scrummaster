@@ -24,12 +24,18 @@ MasterSystem::MasterSystem() {
   outriggerTightIndex = 0;
   outriggerTightSonarAve = 0;
 
+  pushbackPresAve = 0;
+  pushbackPresIndex = 0;
+
   pushbackSonarAve = 0;
   pushbackIndex = 0;
 
   noInterrupts = false;
   successOverFlag_AS = false;
   successOverFlag_UI = false;
+  balancingDone = false;
+  arrayFullFlag = false;
+  debugCounter = 0;
 
 }
 
@@ -41,15 +47,58 @@ MasterSystem::MasterSystem() {
     3. If the pressure in the tank is > CHARGE_PRESSURE_TRIP  (400) ,  which goes into ui.goStrengthPosthit which just updates the display
 */
 void MasterSystem::loop() {
+//	debugCounter++;
+//	if(debugCounter == 5000){
+//		debugCounter = 0;
+//		Serial.print("PB_AVE: "); Serial.println(master.pushbackPresAve);
+//		Serial.print("NAT_PRE: "); Serial.println(accustat.getNaturalPreCharge());
+//	}
 	if(outriggers.getBalanceMode() == true){
 		updateOutriggerLooseArray();
 		updateOutriggerTightArray();
 	}
+	if(balancingDone){
+		int newReading = analogRead(aiAchievedPin);
+		master.pushbackPresAve -= master.pushbackPresArray[master.pushbackPresIndex]/AVG_NUM_READINGS;
+		master.pushbackPresArray[master.pushbackPresIndex] = newReading;
+		master.pushbackPresAve += master.pushbackPresArray[master.pushbackPresIndex]/AVG_NUM_READINGS;
+
+		if(++master.pushbackPresIndex == AVG_NUM_READINGS) {
+			master.pushbackPresIndex = 0;
+			arrayFullFlag = true;
+		}
+		if (arrayFullFlag && accustat.setPreChargeFlag == true) {
+			delay(1000);
+			for(int i = 0; i < AVG_NUM_READINGS; i++){
+					int newReading = analogRead(aiAchievedPin);
+					master.pushbackPresAve -= master.pushbackPresArray[i]/AVG_NUM_READINGS;
+					master.pushbackPresArray[i] = newReading;
+					master.pushbackPresAve += master.pushbackPresArray[i]/AVG_NUM_READINGS;
+			}
+			accustat.setNaturalPreCharge();
+			accustat.setPreChargeFlag = false;
+		}
+//		master.noInterrupts = true;
+//		Serial.print(" live: "); Serial.print(analogRead(aiAchievedPin));
+//		Serial.print(" natPre: "); Serial.print(accustat.getNaturalPreCharge());
+//		Serial.print(" avg: ");
+//
+//		Serial.println(master.pushbackPresAve);
+//		for(int i = 0; i < AVG_NUM_READINGS; i++){
+//							Serial.print(i); Serial.print(": "); Serial.print(master.pushbackPresArray[i]); Serial.print(" ");
+//						}
+//						Serial.println(" ");
+//						Serial.println("                                         ");
+//
+//						//setNaturalPreCharge();
+//		master.noInterrupts = false;
+
+	}
 
   if (strengthChargeTimeoutMillis > 0) {
-	master.noInterrupts = true;
-    volatile int son = pushbackSonarAve;
-    master.noInterrupts = false;
+//	master.noInterrupts = true;
+////    volatile int son = pushbackSonarAve;
+//    master.noInterrupts = false;
     int pres = analogRead(aiAchievedPin);
 
 //    if (son > CHARGE_DISTANCE_TRIP) { //#define CHARGE_DISTANCE_TRIP  390   // if sonar over this, shutdown
@@ -73,7 +122,7 @@ void MasterSystem::loop() {
     // check pushback pressure TRUCK, the valve should blow off right KEVIN?
     if (pres > CHARGE_PRESSURE_TRIP) {  //#define CHARGE_PRESSURE_TRIP  400   // if pressure over this, shutdown (400 means approx. 30 lbs)
       // if pushback pressure too much,
-    	Serial.println("too much pressure - timeout reset");
+//    	Serial.println("too much pressure - timeout reset");
       strengthChargeTimeoutMillis = 0;
       ui.goStrengthPosthit(UISPH_TOO_MUCH, pres - CHARGE_PRESSURE_TRIP);
       return;
@@ -89,7 +138,7 @@ void MasterSystem::loop() {
 //    Serial.print(" m: "); Serial.print(m); Serial.print("  lastMillis: ");Serial.print(lastMillis);
     if (m < lastMillis) {
         elapsedMillis =(unsigned long)(m + (MILLIS_MAX - lastMillis)); //rollover
-        Serial.println(" ROLLOVER ");
+//        Serial.println(" ROLLOVER ");
     }
     else
     	elapsedMillis = m - lastMillis;
@@ -102,18 +151,18 @@ void MasterSystem::loop() {
       strengthChargeTimeoutMillis = 0;
       digitalWrite(oSuccess, HIGH); //allow for the sled to move
       master.successOverFlag_UI = false;
-      Serial.println("_____________SUCCESS ON_____________");
-
-      Serial.print(" AS over  flag: "); Serial.print(master.successOverFlag_AS);
-      Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
-      Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
-      Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
-
-
-      Serial.print(" AS: "); Serial.print(accustat.returnState());
-      Serial.print(" PB: "); Serial.print(pushback.getState());
-      Serial.print(" SS: "); Serial.print(sleep.getState());
-      Serial.print(" UIS: "); Serial.println(ui.getState());
+//      Serial.println("_____________SUCCESS ON_____________");
+//
+//      Serial.print(" AS over  flag: "); Serial.print(master.successOverFlag_AS);
+//      Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
+//      Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
+//      Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
+//
+//
+//      Serial.print(" AS: "); Serial.print(accustat.returnState());
+//      Serial.print(" PB: "); Serial.print(pushback.getState());
+//      Serial.print(" SS: "); Serial.print(sleep.getState());
+//      Serial.print(" UIS: "); Serial.println(ui.getState());
       successStartTime = millis();
 
       ui.goStrengthPosthit(UISPH_SUCCESS, 0);  //changes the screen to display success
@@ -141,7 +190,7 @@ void MasterSystem::heartbeat() {
 		if (lastTowSwitch != MAS_LTS_ON) {
 		  // enter Towing mode
 		  lastTowSwitch = MAS_LTS_ON;
-		  Serial.println("MAS_LTS_ON from here");
+//		  Serial.println("MAS_LTS_ON from here");
 		  ui.enterState(UIS_TOWING); //display towing state
 		  digitalWrite(oDisplayPowerPin, LOW);
 		}
@@ -235,7 +284,7 @@ void MasterSystem::accustatEnteringPosthit() {
   */
   if (lastReadyState != UIS_SCRUM_INDIVIDUAL){
     ui.enterState(lastReadyState);
-    Serial.print(" lastState :"); Serial.print(lastReadyState); Serial.print("UIState");Serial.println(ui.getState());
+//    Serial.print(" lastState :"); Serial.print(lastReadyState); Serial.print("UIState");Serial.println(ui.getState());
     //Serial.println("accustatEnterPostHit caused ghost");
   }
 } //end MasterSystem::accustatEnteringPosthit
@@ -279,7 +328,7 @@ void MasterSystem::UIModeChanged(byte uis) {
       lastMillis = millis();
 //      Serial.println("Master in STrengh Charge");
       strengthChargeTimeoutMillis = ui.getVar(UIVM_STRENGTH_DURATION) * 1000L;
-      Serial.println(" strengthChargeTimeoutMillis was set");
+//      Serial.println(" strengthChargeTimeoutMillis was set");
       break;
 
     case UIS_SCRUM_STRENGTH_POSTHIT:

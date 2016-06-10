@@ -10,11 +10,11 @@ PBS.cpp.o: ../PBS.cpp ../PBS.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/USBAPI.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Arduino.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/variants/mega/pins_arduino.h \
- ../Debug.h ../AS.h ../AVG.h ../TimerOne.h ../Timer.h ../Event.h ../SS.h \
- ../CIS.h ../HAL.h ../UIS.h \
+ ../Debug.h ../AS.h ../AVG.h ../TimerOne.h ../Timer.h ../Event.h ../MAS.h \
+ ../ORS.h ../HAL.h ../pinDefs.h ../SS.h ../CIS.h ../UIS.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/libraries/LiquidCrystal/1.0.4/src/LiquidCrystal.h \
  /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Print.h \
- ../ICS.h ../pinDefs.h ../MAS.h ../ORS.h
+ ../ICS.h
 
 ../PBS.h:
 
@@ -52,11 +52,17 @@ PBS.cpp.o: ../PBS.cpp ../PBS.h \
 
 ../Event.h:
 
+../MAS.h:
+
+../ORS.h:
+
+../HAL.h:
+
+../pinDefs.h:
+
 ../SS.h:
 
 ../CIS.h:
-
-../HAL.h:
 
 ../UIS.h:
 
@@ -65,9 +71,3 @@ PBS.cpp.o: ../PBS.cpp ../PBS.h \
 /Users/Prospect/Documents/eclipseArduino/eclipseArduino.app/Contents/Eclipse/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino/Print.h:
 
 ../ICS.h:
-
-../pinDefs.h:
-
-../MAS.h:
-
-../ORS.h:
