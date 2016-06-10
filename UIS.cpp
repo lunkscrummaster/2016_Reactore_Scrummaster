@@ -90,7 +90,6 @@ UISystem::UISystem(LiquidCrystal &lc) :
 	lcd.noDisplay();
 	pbTooFar = false;
 	accustatDiff = 0;
-	restartStrengthFlag = false;
 }
 
 /* ------------------------------------------UISystem::setNonModVarInfo------------------------------------------
@@ -154,10 +153,10 @@ void UISystem::loop() {
 //	lcd.print(lb);
 //	lcd.print(" ");
 //	lcd.print(tb);
-	if(pbTooFar == true){
-		pbTooFar = false;
-		Serial.println("EmergencyShutDown");
-	}
+//	if(pbTooFar == true){
+//		pbTooFar = false;
+////		Serial.println("EmergencyShutDown: pbTooFar was true");
+//	}
 
 
 	//lcd.setCursor(0,2);
@@ -190,8 +189,6 @@ void UISystem::loop() {
 	boolean modeWasPressed = bMode.update(elapsedMicros) > 0;
 	boolean setWasPressed = bSet.update(elapsedMicros) > 0;
 
-	if(restartStrengthFlag == true)
-		modeWasPressed = true;
 	// if Up/Down buttons pressed, update 'adjust' value
 	int adjust = 0;
 	if (bUp.update(elapsedMicros) > 0)
@@ -244,9 +241,9 @@ void UISystem::loop() {
 	switch (state) {
 	case UIS_SCRUM_POWER:
 		if (modeWasPressed) {
+			accustat.reset();
 			enterState(UIS_SCRUM_STRENGTH);
 			Serial.println("UIS_SCRUM_POWER called ui.enterState");
-			accustat.reset();
 		} else if (setWasPressed) {
 			switch (cur_var) {
 			case UIVM_POWER_THRESHOLD:
@@ -270,16 +267,16 @@ void UISystem::loop() {
 
 	default:  // a Strength mode
 		if (modeWasPressed) {
-			if(restartStrengthFlag == true){
-				accustat.enterState(AS_POSTHIT);
-				enterState(UIS_SCRUM_STRENGTH);
-				pushback.enterState(PBS_READY1_SINKING);
-				restartStrengthFlag = false;
-			}else{
+//			if(restartStrengthFlag == true){
+//				accustat.enterState(AS_POSTHIT);
+//				enterState(UIS_SCRUM_STRENGTH);
+//				pushback.enterState(PBS_READY1_SINKING);
+//				restartStrengthFlag = false;
+//			}else{
 				enterState(UIS_SCRUM_INDIVIDUAL);
 				Serial.println("default ui loop case called enterState");
 				accustat.reset();
-			}
+
 		} else if (state == UIS_SCRUM_STRENGTH && setWasPressed) {
 			switch (cur_var) {
 			case UIVM_STRENGTH_THRESHOLD:
@@ -475,7 +472,7 @@ void UISystem::enterState(byte newState) {
 		halSetPushbackDumpValve(HIGH);
 		lcd.print(" STRENGTH TRAINING ");
 		lcd.setCursor(6, 2);
-		lcd.print("CHARGING");
+		lcd.print("CHARGING ");
 		break;
 
 	case UIS_SCRUM_STRENGTH_POSTHIT:
@@ -489,10 +486,10 @@ void UISystem::enterState(byte newState) {
 			// shutdown
 			lcd.setCursor(6, 1);
 			lcd.print("SHUTDOWN");
-			lcd.setCursor(6, 2);
+			lcd.setCursor(0, 2);
 			switch (strengthPosthitCode) {
 			case UISPH_TOO_HIGH:
-				lcd.print("Difficulty is set to high adujust down"); //difficulty is to high
+				lcd.print("Reduce Duration"); //difficulty is to high
 				break;
 			case UISPH_TOO_FAST:
 				lcd.print("Hold scrum longer");//did not complete duration

@@ -37,7 +37,7 @@
     1000 = 1 second
     2000 = 2 seconds etc...
 */
-#define TRAVEL_TIME   				10000
+#define TRAVEL_TIME   				5000
 
 
 

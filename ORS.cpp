@@ -46,7 +46,7 @@ void OutriggerSystem::loop() {
     	  Serial.println(" inBalanceFalse ");
     	  accustat.resume();
     	  delay(100);
-    	  accustat.setNaturalPreCharge();
+    	  //accustat.setNaturalPreCharge();
     	  setBalanceMode(false);
       }//ends last else
 /*

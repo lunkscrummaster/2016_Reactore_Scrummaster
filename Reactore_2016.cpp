@@ -132,7 +132,7 @@ void loop() {
       Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
       Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
       Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
-      Serial.print(" restartStrengthFlag: "); Serial.println(ui.restartStrengthFlag);
+
 
       Serial.print(" AS: "); Serial.print(accustat.returnState());
       Serial.print(" PB: "); Serial.print(pushback.getState());
@@ -165,6 +165,9 @@ void loop() {
 void sonarISR() {                 //****added to constanty read pushback sonar. can add master shutdown control here later.
 
 	if(!master.noInterrupts){
+
+		accustat.pbAvg.update(analogRead(aiAchievedPin));
+
 		master.pushbackSonarAve -= master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE;
 		int temp =  analogRead(aiPushbackSonar);
 
@@ -190,9 +193,14 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 		if(ui.getState() == UIS_SCRUM_STRENGTH_CHARGE){
 			if(accustat.returnmode() == ASM_STRENGTH && accustat.returnState() == AS_HITTING){
 				if(master.pushbackSonar[master.pushbackIndex] > 78) {
-					pushback.enterState(PBS_READY1_SINKING);
+//					ui.pbTooFar = true;
+					master.strengthChargeTimeoutMillis = 0;
+					accustat.setHasSeenBall(false);
+					Serial.println("             EMERGENCY SHUTDOWN        ");
 					ui.goStrengthPosthit(UISPH_TOO_HIGH, 0);
-					ui.pbTooFar = true;
+					delay(5000);
+					accustat.enterState(AS_POSTHIT);
+					pushback.enterState(PBS_READY1_SINKING);
 
 				}
 			}

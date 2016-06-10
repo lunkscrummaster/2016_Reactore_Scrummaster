@@ -74,18 +74,21 @@ class Accustat {
     void setNaturalPreCharge(void);
     int getNaturalPreCharge(void);
     int aveTimer;
-    bool aveTimerStart;
-    bool earlyPush;
-    bool lookForBall;
-    bool printBall;
+    volatile bool aveTimerStart;
+    volatile bool earlyPush;
+    volatile bool lookForBall;
+    volatile bool printBall;
 
     int  sessionPeak;
     int  currentPeak;  // displayed on LED
     int  hiddenPeak;   // Power/Strength peak displayed at end of cycle, not during cycle
     int  precharge;
     int  lastReading;
-    bool beeperFlag;
-    bool dumpValveFlag;
+    volatile bool beeperFlag;
+    volatile bool dumpValveFlag;
+    volatile bool stDurFailFlag;
+    volatile bool stNoBallFailFlag;
+
     void enterState(byte newState);
 
   private:

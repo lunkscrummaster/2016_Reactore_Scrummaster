@@ -108,7 +108,7 @@ void MasterSystem::loop() {
       Serial.print(" UI over flag: "); Serial.print(master.successOverFlag_UI);
       Serial.print(" dumpValveFlag: "); Serial.print(accustat.dumpValveFlag);
       Serial.print(" beeperFlag: "); Serial.print(accustat.beeperFlag);
-      Serial.print(" restartStrengthFlag: "); Serial.println(ui.restartStrengthFlag);
+
 
       Serial.print(" AS: "); Serial.print(accustat.returnState());
       Serial.print(" PB: "); Serial.print(pushback.getState());
@@ -197,8 +197,8 @@ void MasterSystem::heartbeat() {
       if (successOverFlag_UI) {
     	  //pushback.enterState(PBS_READY1_SINKING);
     	  //Serial.println(" calling PBS_READY1_SINKING early");
-    	  ui.restartStrengthFlag = true;
-    	  //ui.enterState(UIS_SCRUM_STRENGTH);
+ //   	  ui.restartStrengthFlag = true;
+    	  ui.enterState(UIS_SCRUM_STRENGTH);
     	  successOverFlag_UI = false;
       }
       break;
@@ -283,7 +283,9 @@ void MasterSystem::UIModeChanged(byte uis) {
       break;
 
     case UIS_SCRUM_STRENGTH_POSTHIT:
+    	if(!accustat.stDurFailFlag)
       strengthPosthitTimeoutHeartbeats = STRENGTH_POSTHIT_HEARTBEATS;
+
       break;
   } // end switch (lastUIState)
 } // end MasterSystem::UIModeChanged(byte uis)
