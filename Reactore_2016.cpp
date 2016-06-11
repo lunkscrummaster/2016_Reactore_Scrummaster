@@ -139,9 +139,9 @@ void loop() {
 //      Serial.print(" PB: "); Serial.print(pushback.getState());
 //      Serial.print(" SS: "); Serial.print(sleep.getState());
 //      Serial.print(" UIS: "); Serial.println(ui.getState());
-    }
+    } // end if (currentMillis > TRAVEL_TIME)
 
-  }
+  } // end if (master.successStartTime > 0)
   master.loop();      // during Strength Charge phase
   ui.mainTime = millis()-startLoop;
 
@@ -157,16 +157,12 @@ void loop() {
 
 // --------------------------------sonarISR()-------------------------------------------------------------------------------
 /*  Function is called from a timer interrupt
- *  1. First shifts the array
- *  2. Add latest reading to last part of the array
- *  3. Enter PBS_READY3_SETTLING if awake, if PBS is raising, if arm has gone far enough
- *  4. TRUCK ADD POSSIBLE BALL CHECKS FOR TIGHT/LOOSE SONARS
- *  5. TRUCK ADD POSSIBLE CHECK FOR PUSHBACK MOVING TO FAST ie. settings to high
+ *  1. Updates the pushback sonar average
+ *  2. Check for balls going in when lookForBall is set to true
 */
 void sonarISR() {                 //****added to constanty read pushback sonar. can add master shutdown control here later.
 
 	if(!master.noInterrupts){
-		//int p = analogRead(aiAchievedPin);
 
 		master.pushbackSonarAve -= master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE;
 		int temp =  analogRead(aiPushbackSonar);
@@ -182,35 +178,9 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 		}
 		master.pushbackSonarAve += master.pushbackSonar[master.pushbackIndex]/AVE_ARRAY_SIZE;
 
-		/*    CODE PLANNING TO CHECK FOR BALL IN, AND EMERGENCY SHUTDOWN
-		 *   if (accustat.returnmode() == AS_HITTING)  // if we are hitting and need
-		 *   {
-		 *   //check for ball
-		 *   }
-			if (moving to fast)
-			shutdown
-		*/
-		if(ui.getState() == UIS_SCRUM_STRENGTH_CHARGE){
-			if(accustat.returnmode() == ASM_STRENGTH && accustat.returnState() == AS_HITTING){
-				if(master.pushbackSonar[master.pushbackIndex] > 78) {
-//					ui.pbTooFar = true;
-					master.strengthChargeTimeoutMillis = 0;
-					accustat.setHasSeenBall(false);
-//					Serial.println("             EMERGENCY SHUTDOWN        ");
-					ui.goStrengthPosthit(UISPH_TOO_HIGH, 0);
-					delay(5000);
-					accustat.enterState(AS_POSTHIT);
-					pushback.enterState(PBS_READY1_SINKING);
-
-				}
-			}
-		}
-		//TRUCK, NO POINT TO CHECK FOR BALLS WHEN INDIVIDUAL
-		/* original was if (accustat.returnState() == AS_HITTING)
-		 * no point checking for a ball if we are in indiviual mode
-		*/
-		if(accustat.lookForBall == true){
-			if(analogRead(aiLoose_ball_sonar) < 70 || analogRead(aiTight_ball_sonar) < 70){
+// look for balls when needed
+		if(accustat.lookForBall == true) {
+			if(analogRead(aiLoose_ball_sonar) < BALLIN_TRIP || analogRead(aiTight_ball_sonar) < BALLIN_TRIP){
 	//			ui.lb = analogRead(aiLoose_ball_sonar);
 	//			ui.tb = analogRead(aiTight_ball_sonar);
 				accustat.setHasSeenBall(true);
@@ -221,11 +191,13 @@ void sonarISR() {                 //****added to constanty read pushback sonar. 
 					ui.enterState(UIS_SCRUM_STRENGTH_CHARGE);
 				}
 			}
-		}
+		} // end if(accustat.lookForBall == true)
+
+
 		if(++master.pushbackIndex == AVE_ARRAY_SIZE)
 			master.pushbackIndex = 0;
 
-	}
+	} // end master.noInterrupts
 } // end sonarISR()
 
 // --------------------------------initPushbackAve()-------------------------------------------------------------------------------

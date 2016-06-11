@@ -114,7 +114,7 @@ void display_num(int number) {
 	byte thousands;
 	if (number < 0) {
 		number = -number;  // if number is negative, reset it to be positive
-		thousands = LED_DASH_CODE; // writes a dash because of negative number??????
+		thousands = LED_DASH_CODE; // writes a dash because of negative number
 	} else {
 		thousands = (number % 10000) / 1000; //this gets the first digit of the display from the left
 	} //end else
@@ -218,19 +218,6 @@ void Accustat::loop() {
 	else
 		hitTrip = 8;
 
-	/* Added code below by trevor and zach
-	 So if the machine is in sleep mode, the machine should wake up when someone hits the pads
-	 check to see if in sleep, then wakeup if pressure on pads is there.
-	 TRUCK, the analogRead value needs to be tested
-	 */
-	if (sleep.getState() == 0) {
-		if (analogRead(aiAchievedPin) > 275) {
-			sleep.wakeup();
-//			Serial.print("  analogRead(aiAchievedPin) is wakeing it up");
-//			Serial.println(analogRead(aiAchievedPin));
-		}
-	} // end if (sleep.getState() == 0)
-
 	if (isEnabled() && state != AS_QUIET && master.arrayFullFlag) {
 		// update running sum
 //		int p = analogRead(aiAchievedPin); //read current value and assign to p
@@ -269,12 +256,7 @@ void Accustat::loop() {
 			}
 		}	//end case AS_PREHIT
 			break;
-			/*
-			 // Accustat modes POSSIBLE MODES
-			 #define ASM_INDIVIDUAL  0 //individual just measure how strong someone is pushing
-			 #define ASM_POWER       1 ..?
-			 #define ASM_STRENGTH    2 ..?
-			 */
+
 		case AS_HITTING:
 			switch (mode) {
 			case ASM_INDIVIDUAL:
@@ -386,10 +368,6 @@ void Accustat::resume() {
 /* ---------------------------------------Accustat::setMode (byte)---------------------------------------
  This function is called from PushbackSystem::goReady(
  1. This function assigns the Accustat mode to whatever was passed in
- // Accustat modes
- #define ASM_INDIVIDUAL  0
- #define ASM_POWER       1
- #define ASM_STRENGTH    2
  */
 void Accustat::setMode(byte m) {
 	mode = m;
@@ -422,8 +400,6 @@ void Accustat::enterState(byte newState) {
 //		pbAvg.reset();
 //		accustat.setNaturalPreCharge();
 //		Serial.print(" NATTYPRECHARGY: "); Serial.println(naturalPreCharge);
-
-
 		break;
 
 	case AS_HITTING:
@@ -464,17 +440,12 @@ void Accustat::enterState(byte newState) {
 			}
 		else {
 			ui.goStrengthPosthit(UISPH_TOO_FAST, ui.getVar(UIVM_STRENGTH_DURATION)-1);
-
 		}
-
 		break;
 	} //end switch (state)
 } // end Accustat::enterState
 
 /* ---------------------------------------Accustat::heartbeat()---------------------------------------
- Possibble states
- // accustat states
- #define AS_QUIET      0   #define AS_PREHIT     1   #define AS_HITTING    2  #define AS_POSTHIT    3
  1. go into beeperHeartbeat, which starts or stops the beep
  2. go into displayHeartbeat, which updates the LED screen
  3. Checks state, and does things depending on the state
@@ -484,16 +455,9 @@ void Accustat::heartbeat() {
 	beeperHeartbeat(); //just above
 	displayHeartbeat(); //just above
 	//Serial.print("lastReading: "); Serial.println(lastReading);
-	/* // accustat state
-	 #define AS_QUIET      0   #define AS_PREHIT     1   #define AS_HITTING    2   #define AS_POSTHIT    3
-	 */
+
 	switch (state) {
 	case AS_HITTING: {
-		/* **** Changed made May 21 by Trevor and Zach
-		 Below, the converiosn that was made before didn't seem right.
-		 We changed the equation to what we got from the data that was supplised by Kevin
-		 */
-		//changed this equation to fit experimentally acquired data
 		int x = master.pushbackPresAve - naturalPreCharge;
 		if (x < 0)
 			x = 0;
@@ -505,11 +469,7 @@ void Accustat::heartbeat() {
 //		Serial.print(disp);
 //		Serial.print(" aianalogread: ");
 //		Serial.println(analogRead(aiAchievedPin));
-		/*
-		 // Accustat modes POSSIBLE MODES
-		 #define ASM_INDIVIDUAL  0 //individual just measure how strong someone is pushing
-		 #define ASM_POWER       1 ..?		#define ASM_STRENGTH    2 ..?
-		 */
+
 		switch (mode) {
 		case ASM_INDIVIDUAL:
 			if (currentPeak < disp) {
@@ -519,7 +479,7 @@ void Accustat::heartbeat() {
 				// beep for passing current peak?
 			} // end if (currentPeak < disp)
 
-//			if (sessionPeak < currentPeak) { //TRUCK this needs nested in some cases, so no beep during push
+//			if (sessionPeak < currentPeak) { // this needs nested in some cases, so no beep during push
 ////				sessionPeak = currentPeak;
 //				//		Serial.print(" current accustat state: "); Serial.println(accustat.returnState());
 ////				Serial.print("if (sessionPeak < currentPeak) line 469 called beep()");
@@ -530,7 +490,7 @@ void Accustat::heartbeat() {
 //				}
 //			}
 			break;
-			// below will call a penatly if the players are pushing to hard before the ball is in???
+			// below will call a penalty if the players are pushing to hard before the ball is in???
 		case ASM_POWER: {
 			if (disp > ENGAGED_MIN) {
 				int threshold = ui.getVar(UIVM_POWER_THRESHOLD) * 100;
@@ -557,7 +517,7 @@ void Accustat::heartbeat() {
 				} else { //disp > thresh
 					if (lookForBall) {
 						digitalWrite(oBeeper, HIGH);
-						Serial.println("beeper turned on for the early push        ");
+//						Serial.println("beeper turned on for the early push        ");
 						//Serial.print(" disp: "); Serial.println(disp);
 						earlyPush = true;
 					} else {
@@ -644,12 +604,9 @@ void Accustat::heartbeat() {
 				  // closes if (disp > threshold)
 			} // end if (disp > ENGAGED_MIN)
 		} // end case ASM_POWER
-
 			break;
 		} // end switch (mode)
 
-//		int p = analogRead(aiAchievedPin); //read current value and assign to p
-//		pbAvg.update(p); //update the average, using the last read value
 
 		if (returnmode() == ASM_INDIVIDUAL) {
 			//Serial.print("  average: "); Serial.print(pbAvg.getAverage()); Serial.print(" precharge "); Serial.print(naturalPreCharge);
@@ -692,18 +649,12 @@ void Accustat::heartbeat() {
 							//
 //					int avePB = pbAvg.getAverage();
 //					if(avePB < naturalPreCharge && hasSeenBall){
-//							Serial.print("%Diff: ");
-//							Serial.print(change);
-//							Serial.print("  Seen Ball: ");
-//							Serial.print(hasSeenBall);
-//							Serial.print("  lastRead: ");
-//							Serial.print(lastReading);
-//							Serial.print("  NAT_PRE: ");
-//							Serial.print(naturalPreCharge);
-//							Serial.print("  currPeak: ");
-//							Serial.print(currentPeak);
-//							Serial.print("  Look Flag: ");
-//							Serial.println(lookForBall);
+//							Serial.print("%Diff: "); Serial.print(change);
+//							Serial.print("  Seen Ball: "); Serial.print(hasSeenBall);
+//							Serial.print("  lastRead: "); Serial.print(lastReading);
+//							Serial.print("  NAT_PRE: "); Serial.print(naturalPreCharge);
+//							Serial.print("  currPeak: "); Serial.print(currentPeak);
+//							Serial.print("  Look Flag: "); Serial.println(lookForBall);
 
 							enterState(AS_POSTHIT);
 //							Serial.println(" hasSeenball false ");
@@ -727,10 +678,8 @@ void Accustat::heartbeat() {
 			case ASM_STRENGTH:
 				if (currentPeak < hiddenPeak) {
 					saveHiddenPeak();
-//					Serial.print(" currentPeak: ");
-//					Serial.print(currentPeak);
-//					Serial.print("  lastReading: ");
-//					Serial.println(lastReading);
+//					Serial.print(" currentPeak: "); Serial.print(currentPeak);
+//					Serial.print("  lastReading: "); Serial.println(lastReading);
 					display_num(currentPeak);
 				}
 
@@ -749,18 +698,12 @@ void Accustat::heartbeat() {
 
 //					int avePB = pbAvg.getAverage();
 //					if(avePB < naturalPreCharge && hasSeenBall){
-//							Serial.print("%Diff: ");
-//							Serial.print(change);
-//							Serial.print("  Seen Ball: ");
-//							Serial.print(hasSeenBall);
-//							Serial.print("  lastRead: ");
-//							Serial.print(lastReading);
-//							Serial.print("  NAT_PRE: ");
-//							Serial.print(naturalPreCharge);
-//							Serial.print("  currPeak: ");
-//							Serial.print(currentPeak);
-//							Serial.print("  Look Flag: ");
-//							Serial.println(lookForBall);
+//							Serial.print("%Diff: "); Serial.print(change);
+//							Serial.print("  Seen Ball: "); Serial.print(hasSeenBall);
+//							Serial.print("  lastRead: "); Serial.print(lastReading);
+//							Serial.print("  NAT_PRE: "); Serial.print(naturalPreCharge);
+//							Serial.print("  currPeak: "); Serial.print(currentPeak);
+//							Serial.print("  Look Flag: "); Serial.println(lookForBall);
 							enterState(AS_POSTHIT);
 							master.successOverFlag_AS = false;
 //							Serial.println(" hasSeenball false ");
@@ -823,7 +766,7 @@ void Accustat::heartbeat() {
 } //end Accustat::heartbeat()
 
 /* ---------------------------------------Accustat::returnmode()---------------------------------------
- *  Called from: ....????
+ *  Called from: beeperHeartbeat() Accustat::heartbeat , MasterSystem::loop , sonarISR
  *  1. Returns the Accustat mode
  */
 byte Accustat::returnmode() {
@@ -831,7 +774,7 @@ byte Accustat::returnmode() {
 } // end returnmode
 
 /* ---------------------------------------Accustat::returnstate()---------------------------------------
- *  Called from: sonarISR in main page
+ *  Called from: Accustat::heartbeat , MasterSystem::loop
  *  1. Returns the Accustat state
  */
 byte Accustat::returnState() {
@@ -844,35 +787,34 @@ byte Accustat::returnState() {
  */
 boolean Accustat::getHasSeenBall() {
 	return hasSeenBall;
-}
+} // end Accustat::getHasSeenBall()
 
 /* ---------------------------------------Accustat::setHasSeenBall()---------------------------------------
- *  Called from: sonarISR in main page
+ *  Called from: sonarISR() , MasterSystem::loop , Accustat::heartbeat
  *  1. Sets hasSeenBall
  */
 void Accustat::setHasSeenBall(boolean ball) {
 	hasSeenBall = ball;
-}
+} // end Accustat::setHasSeenBall
 
 /* ---------------------------------------Accustat::setNaturalPreCharge()---------------------------------------
- *
- *
+ * Called from: MasterSytem::loop
+ * 1. Sets the naturalPreCharge to the live average
  */
 void Accustat::setNaturalPreCharge(void) {
-
 	master.noInterrupts = true;
 	naturalPreCharge = master.pushbackPresAve;
 	Serial.print(" natural precharge: "); Serial.println(naturalPreCharge);
 	master.noInterrupts = false;
 //	Serial.print("NAT_PRE");
 //	Serial.println(naturalPreCharge);
-}
+} // end Accustat::setNaturalPreCharge(
 
 /* ---------------------------------------Accustat::getNaturalPreCharge()---------------------------------------
- *
+ * not used since naturalPreCharge is public
  *
  */
 int Accustat::getNaturalPreCharge(void) {
 	return naturalPreCharge;
-}
+} // end Accustat::getNaturalPreCharge(
 

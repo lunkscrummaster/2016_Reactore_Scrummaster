@@ -14,7 +14,6 @@ OutriggerSystem::OutriggerSystem() {
 
 /*--------------------------------------OUTRIGGER_LOOP--------------------------------------
  * OutriggerSystem checks if the machine is inBalanceMode, and raises the loose up or down
-   ORS_BALANCE_TRIP == 40 WHICH IS ABOVE ^^^
 */
 void OutriggerSystem::loop() {
   //  Serial.println("Outrigger Loop started");
@@ -117,7 +116,10 @@ void OutriggerSystem::setBalanceMode(boolean en) {
 
 
 //--------------------------------------GET_BALANCE_MODE--------------------------------------
+/* Called from Accustat::loop , MasterSystem::loop ,  main loop
+ * 1. returns inBalanceMode
+*/
 bool OutriggerSystem::getBalanceMode(){
 	return inBalanceMode;
-}
+} // end OutriggerSystem::getBalanceMode()
 

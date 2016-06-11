@@ -140,11 +140,5 @@ byte PushbackSystem::getState() {
   return state;
 } // end PushbackSystem::getState()
 
-//******************** WHY IS THIS COMMENTED OUT?????????????
-//void PushbackSystem::reReady() {
-//  accustat.pause();
-//  enterState(PBS_READY2_RAISING);
-//}
-
 
 

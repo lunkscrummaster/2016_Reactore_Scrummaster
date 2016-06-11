@@ -214,7 +214,6 @@ void UISystem::loop() {
 				if (sleep.getState() == SSS_ASLEEP) {
 					if (modeWasPressed || setWasPressed
 							|| adjust != 0 || digitalRead(iTrailerPowerPin) == LOW) {
-						// TRUCK original: digitalRead(iTrailerPowerPin) == LOW
 						sleep.wakeup();
 	//    Serial.println(" button press check is calling wakeup ");
 	//    Serial.print(" modeWasPressed: "); Serial.print(modeWasPressed);
@@ -224,8 +223,7 @@ void UISystem::loop() {
 						// ****  enterState(state); //reset the screen
 					} // end if button was pressed
 				} // end if asleep
-	// ???? investigate the sonar pushback safety stystem of when it should shut off because
-	// it is going to fast TRUCK
+
 
 	// reset the Accustat when the Set button is pressed
 	if (setWasPressed)
@@ -496,7 +494,6 @@ void UISystem::enterState(byte newState) {
 				break;
 			case UISPH_TOO_MUCH:
 				lcd.print("Reduce "); //may be not needed
-				//TRUCK add a print to the lcd for when they are above the threshold and the buzzer is going off
 				break;
 			default:
 				lcd.print("?? ");

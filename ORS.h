@@ -34,7 +34,6 @@ class OutriggerSystem {
     boolean outriggersFirstPumpDone;
 
   private:
-
     boolean inBalanceMode;
 };
 

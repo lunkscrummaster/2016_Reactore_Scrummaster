@@ -27,7 +27,6 @@
 #define INDIVIDUAL_SINK_RAISE      	61, 70   	//Minimum pushback distance is approx. 33cm, max is approx 40cm
 #define POWER_SINK_RAISE           	61, 70  	// here are the pushback arm settings
 #define STRENGTH_SINK_RAISE        	60, 61
-//#define RESET 						300, 325
 
 #define CHARGE_PRESSURE_TRIP  		400   		// if pressure over this, shutdown (400 means approx. 30 lbs) TRUCK
 #define CHARGE_DISTANCE_TRIP  		78   		// if sonar over this, shutdown; in analog Read
@@ -67,21 +66,27 @@ class MasterSystem {
 
     volatile unsigned long successStartTime;
 
-    volatile int outriggerLooseIndex;
-    volatile int outriggerTightIndex;
+
 
     volatile int outriggerLooseSonar [AVE_ARRAY_SIZE];
     volatile int outriggerLooseSonarAve;
+    volatile int outriggerLooseIndex;
+
+
     volatile int outriggerTightSonar [AVE_ARRAY_SIZE];
     volatile int outriggerTightSonarAve;
-    volatile int pushbackPresArray[AVG_NUM_READINGS];
-    volatile int pushbackPresAve;
-    volatile int pushbackPresIndex;
+    volatile int outriggerTightIndex;
 
     volatile int pushbackSonar [AVE_ARRAY_SIZE];
     volatile int pushbackSonarAve;
     volatile int pushbackIndex;
+
+    volatile int pushbackPresArray[AVG_NUM_READINGS];
+    volatile int pushbackPresAve;
+    volatile int pushbackPresIndex;
+
     volatile unsigned long strengthChargeTimeoutMillis;
+
     volatile bool noInterrupts;
     volatile bool successOverFlag_AS;
     volatile bool successOverFlag_UI;

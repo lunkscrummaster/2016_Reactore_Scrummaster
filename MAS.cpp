@@ -24,19 +24,19 @@ MasterSystem::MasterSystem() {
   outriggerTightIndex = 0;
   outriggerTightSonarAve = 0;
 
-  pushbackPresAve = 0;
   pushbackPresIndex = 0;
+  pushbackPresAve = 0;
 
-  pushbackSonarAve = 0;
   pushbackIndex = 0;
+  pushbackSonarAve = 0;
+
+  debugCounter = 0;
 
   noInterrupts = false;
   successOverFlag_AS = false;
   successOverFlag_UI = false;
   balancingDone = false;
   arrayFullFlag = false;
-  debugCounter = 0;
-
 }
 
 
@@ -47,6 +47,26 @@ MasterSystem::MasterSystem() {
     3. If the pressure in the tank is > CHARGE_PRESSURE_TRIP  (400) ,  which goes into ui.goStrengthPosthit which just updates the display
 */
 void MasterSystem::loop() {
+/*
+ * Emergency shutdown removed from interrupt, and put into a faster loop
+*/
+	if(ui.getState() == UIS_SCRUM_STRENGTH_CHARGE){
+		if(accustat.returnmode() == ASM_STRENGTH && accustat.returnState() == AS_HITTING){
+			if(master.pushbackSonar[master.pushbackIndex] > 78) {
+//					ui.pbTooFar = true;
+				master.strengthChargeTimeoutMillis = 0;
+				accustat.setHasSeenBall(false);
+				Serial.println("      EMERGENCY SHUTDOWN        ");
+				ui.goStrengthPosthit(UISPH_TOO_HIGH, 0);
+				delay(5000);
+				accustat.enterState(AS_POSTHIT);
+				pushback.enterState(PBS_READY1_SINKING);
+
+			}
+		}
+	} // end shutdown
+
+
 //	debugCounter++;
 //	if(debugCounter == 5000){
 //		debugCounter = 0;
@@ -119,14 +139,14 @@ void MasterSystem::loop() {
     //  lastSonarDistance = son;
     //  lastSonarMillis   = sonarMillis;
 
-    // check pushback pressure TRUCK, the valve should blow off right KEVIN?
-    if (pres > CHARGE_PRESSURE_TRIP) {  //#define CHARGE_PRESSURE_TRIP  400   // if pressure over this, shutdown (400 means approx. 30 lbs)
-      // if pushback pressure too much,
-//    	Serial.println("too much pressure - timeout reset");
-      strengthChargeTimeoutMillis = 0;
-      ui.goStrengthPosthit(UISPH_TOO_MUCH, pres - CHARGE_PRESSURE_TRIP);
-      return;
-    }
+//    if (pres > CHARGE_PRESSURE_TRIP) {   // if pressure over this, shutdown (400 means approx. 30 lbs)
+//      // if pushback pressure too much,
+////    	Serial.println("too much pressure - timeout reset");
+//      strengthChargeTimeoutMillis = 0;
+//      ui.goStrengthPosthit(UISPH_TOO_MUCH, pres - CHARGE_PRESSURE_TRIP);
+//      return;
+//    }
+
     /* Code Added by Trevor and Zach
         The code below, keeps track of the timer for the strength charge push, which after they hold this for a certain
         time, the sled is released, and it can be pushed. The sled push length is handled by anothter timer.
@@ -145,7 +165,6 @@ void MasterSystem::loop() {
     lastMillis = m;
     strengthChargeTimeoutMillis -= elapsedMillis;
 //    Serial.print("  elapsedMillis: ");Serial.print(elapsedMillis);
-
 
     if (strengthChargeTimeoutMillis < 50) {
       strengthChargeTimeoutMillis = 0;
@@ -175,7 +194,6 @@ void MasterSystem::loop() {
 /* ------------------------------------------MasterSystem::heartbeat()------------------------------------------
     This function is called from heartbeat() in the main page
     // states of 'lastTowingSwitch'
-   #define MAS_LTS_UNKNOWN  0   #define MAS_LTS_OFF      1   #define MAS_LTS_ON       2
     1. If the towing switch is in towing up, change LCD to display towing mode
     2. If not in towing up, change LCD to display last state
     3. Does some more stuff that I DON'T UNDERSTAND RIGHT NOW
@@ -186,7 +204,6 @@ void MasterSystem::heartbeat() {
 //Serial.print(" iTrailerPowerPin status: "); Serial.println(digitalRead(iTrailerPowerPin));
   // check towing switch
   if (halIsTowScrumSwitchInTowing()) {
-	  if(halIsTowScrumSwitchInTowing()){
 		if (lastTowSwitch != MAS_LTS_ON) {
 		  // enter Towing mode
 		  lastTowSwitch = MAS_LTS_ON;
@@ -194,7 +211,6 @@ void MasterSystem::heartbeat() {
 		  ui.enterState(UIS_TOWING); //display towing state
 		  digitalWrite(oDisplayPowerPin, LOW);
 		}
-	  }
   } else {
     if (lastTowSwitch != MAS_LTS_OFF) {
       // exit Towing mode
@@ -218,11 +234,11 @@ void MasterSystem::heartbeat() {
       initcharge.enable(true);
     }
   } else {
-    if (digitalRead(iTrailerPowerPin) == LOW) {  // TRUCK, NEEDS TO BE TESTED WITH NEW CIRCUIT
+    if (digitalRead(iTrailerPowerPin) == LOW) {
       accustat.enable(false);
       pushback.enable(false);
       initcharge.enable(false);
-    } // if the truck is hooked up, write above to low
+    } // if the vehicle is hooked up, write above to low
   } // end if
   /* Removed code below
     boolean isLastUIStateNotTowing = lastUIState != UIS_TOWING;
@@ -230,7 +246,7 @@ void MasterSystem::heartbeat() {
     pushback.enable                (isLastUIStateNotTowing);
     accustat.enable                (isLastUIStateNotTowing);
   */
-  digitalWrite(oReservoirLockout, ssState ? HIGH : LOW); //switches a boolean to high or low appropriately
+  digitalWrite(oReservoirLockout, sleep.getState() == SSS_AWAKE ? HIGH : LOW); //switches a boolean to high or low appropriately
 
   //***** the switch statement is lacking logic because it is switching a variable that has just been
   // define to == 1 ?????????????????????????????
@@ -427,6 +443,9 @@ void MasterSystem::updateOutriggerTightArray() {
 
 
 //-------------------------------------------fillOutriggerArray------------------------------------------------------------------
+/* Called from OutriggerSystem::setBalanceMode
+ * 1. This fills the ourtigger array with sonar values until the array is full
+*/
 void MasterSystem::fillOutriggerArray(){
 	for(int i = 0; i < AVE_ARRAY_SIZE; i++){
 		outriggerLooseSonar[i] = analogRead(aiOutriggerLooseSonar);
@@ -445,8 +464,8 @@ void MasterSystem::fillOutriggerArray(){
 				outriggerTightSonar[i] = outriggerTightSonar[i-1];
 			}
 		}
-	}
-}
+	} // end for
+} // end MasterSystem::fillOutriggerArray()
 
 /*-------------------------------------------getLastUIState------------------------------------------------------------------
  * Called from:
@@ -454,7 +473,7 @@ void MasterSystem::fillOutriggerArray(){
 */
 byte MasterSystem::getLastUIState() {
 	return lastUIState;
-}
+} // end MasterSystem::getLastUIState()
 
 
 

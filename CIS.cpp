@@ -18,7 +18,6 @@ CompressorSystem::CompressorSystem() {
 	  pvUnloaderTimeout = 0;
 }
 
-
 /*----------------------------------- CompressorSystem::heartbeat-----------------------------------
  *  This is called from the heartbeat() in the main page
  *  1. Reads the reservoir pressure
@@ -168,10 +167,4 @@ void InverterSystem::neededByCompressor(boolean en) {
 void InverterSystem::neededByDumpValve(boolean en) {
   nbDumpValve = en;
 } //end InverterSystem::neededByDumpValve
-
-
-
-
-
-
 

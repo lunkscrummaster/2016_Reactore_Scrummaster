@@ -39,6 +39,9 @@
 */
 #define TRAVEL_TIME   				5000
 
+#define BALLIN_TRIP  70 //analogRead value, not cm
+
+
 
 
 

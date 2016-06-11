@@ -69,7 +69,6 @@ void InitialChargeSystem::enable(boolean en) {
 
 /* -----------------------------------InitialChargeSystem::getCurrentPercent-----------------------------------
  *  This function is not called
- *  What is the purpose and need for this????
 */
 int InitialChargeSystem::getCurrentPercent() {
   int per = (int) ((analogRead(aiPrechargePin) - PERCENT_TO_PRESSURE_OFFSET) / PERCENT_TO_PRESSURE_FACTOR);
@@ -82,8 +81,6 @@ int InitialChargeSystem::getCurrentPercent() {
 /* -----------------------------------InitialChargeSystem::setTargetPercent-----------------------------------
  *  This function is called from MasterSystem::UIModeChanged , MasterSystem::UIVarChanged
  *  // converting percent to raw pressure (from analogRead)
- * #define PERCENT_TO_PRESSURE_OFFSET  160
- * #define PERCENT_TO_PRESSURE_FACTOR  2.8    // 2.8 corresponds to max 35 lbs
  * 1. Sets the target pressure that is desired
  * 2. Increase pressure in pushback arm if needed
  * 3. Decrease pressure in pushback arm if needed
@@ -127,8 +124,4 @@ void InitialChargeSystem::enterState(byte newState) {
       break;
   } // end switch (state)
 } // end InitialChargeSystem::enterState
-
-
-
-
 

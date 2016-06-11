@@ -90,10 +90,7 @@ void SleepSystem::enterState(byte newState) {
       }
       digitalWrite(oBatteryLink, HIGH); //link batteries
       timeoutHeartbeats = SLEEP_TIMEOUT_SECONDS * HEARTBEATS_PER_SECOND;
-      // Serial.println("The SSS_awake enterstate fucntion reset timeoutheartbeats");
-      // added analogRead(aiScrumPin) == LOW to see if that would help the LED screen from flickering
       if (digitalRead(iTrailerPowerPin) == HIGH && analogRead(aiScrumPin) == HIGH) { //truck not plugged in
-        // TRUCK original: digitalRead(iTrailerPowerPin) == HIGH
         digitalWrite(oDisplayPowerPin, HIGH);      //turn on LED
       }
       break;

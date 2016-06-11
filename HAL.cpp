@@ -11,10 +11,6 @@
 // Sonar accuracy might be improved by using Input Capture hardware,
 // see: https://gist.github.com/mpflaga/4404996
 
-// detects ball if ball-in sonars are less than this (micros)
-// TRUCK    THIS VALUE NEEDS TO BE TESTED
-#define BALLIN_TRIP  5000//chagned from 3000 to 5000, should trip at anything less than 50cm
-
 ////////// HARDWARE-SPECIFIC SONAR ROUTINES ////////////////////////////////////////
 
 //int hal_ReadSonarHCSR04(byte tries, byte trigPin, byte sensePin) {
@@ -149,10 +145,6 @@ void halSetup() {
 // // Serial.print("sonar value: ");Serial.print(sonar);Serial.print(" Pin #: ");Serial.print(pin);
 // // Serial.println(" ballin? ");
 //  return sonar > 0 && sonar < BALLIN_TRIP;// sonar reads value > 0 and less than or equal to ???
-///**************************************************************************************************************
-// * what value does that BALLIN_TRIP need to be?
-// * Remember the sonar reads 29~30cm when detecting 30cm or less objects
-// *****************************************************************************************************/
 //} // end halIsBallIn
 
 
@@ -239,8 +231,4 @@ int halReadSonar_Pushback(byte tries) {
 //  return hal_ReadSonarHCSR04(tries, oPushback_sonar_trigger, iPushback_sonar_echo);
   return hal_ReadSonarMB7360(tries, aiPushbackSonar); // changed
 } // end halReadSonar_Pushback
-
-
-
-
 
